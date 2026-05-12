@@ -15,19 +15,19 @@ export default defineConfig({
       includeAssets: ['poker-hand.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-        navigateFallback: '/index.html'
+        navigateFallback: '/poker-points/index.html'
       },
       manifest: {
         name: 'Poker Points',
         short_name: 'Poker',
-        start_url: '/',
+        start_url: '/poker-points/',
         display: 'standalone',
-        scope: '/',
+        scope: '/poker-points/',
         background_color: '#000',
         theme_color: '#000',
         icons: [
           {
-            src: '/poker-hand.png',
+            src: '/poker-points/poker-hand.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
