@@ -19,7 +19,7 @@ export default defineConfig({
       },
       manifest: {
         name: 'Poker Points',
-        short_name: 'Poker',
+        short_name: 'Poker Points',
         start_url: '/poker-points/',
         display: 'standalone',
         scope: '/poker-points/',
