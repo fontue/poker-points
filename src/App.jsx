@@ -90,9 +90,6 @@ function ConfirmDialog({ action, onCancel, onConfirm }) {
             <h3 className="text-lg font-bold">Подтвердить уменьшение?</h3>
             <p className="mt-1 text-sm text-zinc-400">Это действие уменьшит параметр игрока «{action.playerName}».</p>
           </div>
-          <button onClick={onCancel} className="rounded-full bg-white/10 p-2 text-zinc-300">
-            <X size={18} />
-          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -124,9 +121,6 @@ function DeletePlayerDialog({ player, onCancel, onConfirm }) {
             <h3 className="text-lg font-bold">Удалить игрока?</h3>
             <p className="mt-1 text-sm text-zinc-400">Игрок «{player.name}» будет удалён вместе со всеми его бай-инами и оплатами.</p>
           </div>
-          <button onClick={onCancel} className="rounded-full bg-white/10 p-2 text-zinc-300">
-            <X size={18} />
-          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -187,7 +181,7 @@ function AddPlayerDialog({ value, history, existingNames, onChange, onCancel, on
         {history.length > 0 && (
           <div className="mt-4">
             <div className="mb-2 text-sm font-bold text-zinc-400">История имён</div>
-            <div className="space-y-2">
+            <div className="max-h-[38dvh] space-y-2 overflow-y-auto pr-1 overscroll-contain">
               {[...history]
                 .sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }))
                 .map((name) => {
@@ -374,6 +368,22 @@ export default function PokerPointsPWA() {
   useEffect(() => {
     localStorage.setItem(PLAYER_NAMES_STORAGE_KEY, JSON.stringify(playerNamesHistory));
   }, [playerNamesHistory]);
+
+  useEffect(() => {
+    const isModalOpen = Boolean(confirmAction || deletePlayerId || isAddPlayerOpen || isSettingsOpen);
+    if (!isModalOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [confirmAction, deletePlayerId, isAddPlayerOpen, isSettingsOpen]);
 
   const totals = useMemo(() => {
     const totalBuyIns = state.players.reduce((sum, p) => sum + p.buyIns, 0);
