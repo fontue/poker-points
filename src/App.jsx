@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus, Settings2, X, Check, Trash2, UserPlus } from 'lucide-react';
+import { Minus, Settings2, X, Trash2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import './App.css';
 
 const STORAGE_KEY = 'poker-points-pwa-state-v1';
+const PLAYER_NAMES_STORAGE_KEY = 'poker-points-player-names-v1';
 
 const defaultState = {
   settings: {
@@ -28,6 +29,21 @@ function loadState() {
   } catch {
     return defaultState;
   }
+}
+
+function loadPlayerNamesHistory() {
+  try {
+    const raw = localStorage.getItem(PLAYER_NAMES_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((name) => typeof name === 'string' && name.trim()) : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeName(name) {
+  return name.trim().replace(/\s+/g, ' ');
 }
 
 function formatNumber(value) {
@@ -126,6 +142,138 @@ function DeletePlayerDialog({ player, onCancel, onConfirm }) {
   );
 }
 
+function AddPlayerDialog({ value, history, existingNames, onChange, onCancel, onConfirm, onSelectHistoryName, onDeleteHistoryName }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden bg-black/60 px-4 pt-[12dvh]">
+      <motion.div
+        initial={{ y: 16, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 16, opacity: 0, scale: 0.98 }}
+        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
+      >
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-bold">Добавить игрока</h3>
+          </div>
+          <button onClick={onCancel} className="rounded-full bg-white/10 p-2 text-zinc-300">
+            <X size={18} />
+          </button>
+        </div>
+
+        <input
+          value={value}
+          onFocus={(e) => {
+            setTimeout(() => {
+              e.currentTarget.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }, 250);
+          }}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onConfirm();
+          }}
+          placeholder="Имя игрока"
+          className="mb-3 h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-lg font-semibold outline-none placeholder:text-zinc-600 focus:border-violet-400"
+        />
+
+        <div className="grid grid-cols-2 gap-3">
+          <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+            Отмена
+          </Button>
+          <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
+            Добавить
+          </Button>
+        </div>
+
+        {history.length > 0 && (
+          <div className="mt-4">
+            <div className="mb-2 text-sm font-bold text-zinc-400">История имён</div>
+            <div className="space-y-2">
+              {[...history]
+                .sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }))
+                .map((name) => {
+                  const isAlreadyAdded = existingNames.some((existingName) => existingName.toLowerCase() === name.toLowerCase());
+
+                  return (
+                    <div key={name} className="flex items-center gap-2 rounded-2xl bg-zinc-900 p-2 ring-1 ring-white/5">
+                      <button
+                        type="button"
+                        onClick={() => onSelectHistoryName(name)}
+                        disabled={isAlreadyAdded}
+                        className="min-w-0 flex-1 truncate rounded-xl px-3 py-2 text-left text-sm font-bold text-white disabled:text-zinc-600"
+                      >
+                        {name}
+                        {isAlreadyAdded ? ' · В игре' : ''}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDeleteHistoryName(name)}
+                        className="rounded-xl bg-white/10 p-2 text-zinc-400 active:scale-95"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+function SettingsDialog({ buyInPoints, buyInChips, onChange, onConfirm }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden bg-black/60 px-4 pt-[10dvh]">
+      <motion.div
+        initial={{ y: 16, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 16, opacity: 0, scale: 0.98 }}
+        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
+      >
+        <div className="mb-4 flex items-start justify-center gap-3">
+          <div>
+            <h3 className="text-lg font-bold">Параметры игры</h3>
+            <p className="mt-1 text-sm text-zinc-400">Настройки бай-ина и количества фишек.</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="block">
+            <span className="mb-2 block text-sm text-zinc-300">Стоимость 1 бай-ина в поинтах</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={buyInPoints}
+              onChange={(e) => onChange('buyInPoints', e.target.value)}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm text-zinc-300">Сколько фишек в 1 бай-ине</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={buyInChips}
+              onChange={(e) => onChange('buyInChips', e.target.value)}
+              className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
+            />
+          </label>
+        </div>
+
+        <div className="mt-4 grid">
+          <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
+            Готово
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 function CounterRow({ value, colorClass, onInc, onDec }) {
   return (
     <div className="rounded-2xl bg-zinc-900/80 p-2 ring-1 ring-white/5">
@@ -215,10 +363,17 @@ export default function PokerPointsPWA() {
   const [playerName, setPlayerName] = useState('');
   const [confirmAction, setConfirmAction] = useState(null);
   const [deletePlayerId, setDeletePlayerId] = useState(null);
+  const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [playerNamesHistory, setPlayerNamesHistory] = useState(loadPlayerNamesHistory);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    localStorage.setItem(PLAYER_NAMES_STORAGE_KEY, JSON.stringify(playerNamesHistory));
+  }, [playerNamesHistory]);
 
   const totals = useMemo(() => {
     const totalBuyIns = state.players.reduce((sum, p) => sum + p.buyIns, 0);
@@ -236,6 +391,8 @@ export default function PokerPointsPWA() {
     [state.players, deletePlayerId]
   );
 
+  const existingPlayerNames = useMemo(() => state.players.map((player) => player.name), [state.players]);
+
   function updateSettings(key, value) {
     setState((prev) => ({
       ...prev,
@@ -246,21 +403,53 @@ export default function PokerPointsPWA() {
     }));
   }
 
-  function toggleSettings() {
-    setState((prev) => ({
-      ...prev,
-      settings: {
-        ...prev.settings,
-        isCollapsed: !prev.settings.isCollapsed
-      }
-    }));
+  function openSettingsDialog() {
+    setIsSettingsOpen(true);
+  }
+
+  function closeSettingsDialog() {
+    setIsSettingsOpen(false);
+  }
+
+  function openAddPlayerDialog() {
+    setPlayerName('');
+    setIsAddPlayerOpen(true);
+  }
+
+  function closeAddPlayerDialog() {
+    setPlayerName('');
+    setIsAddPlayerOpen(false);
   }
 
   function addPlayer() {
-    const name = playerName.trim();
+    const name = normalizeName(playerName);
     if (!name) return;
+
+    const isDuplicate = state.players.some((player) => player.name.toLowerCase() === name.toLowerCase());
+    if (isDuplicate) return;
+
     setState((prev) => ({ ...prev, players: [...prev.players, makePlayer(name)] }));
+    setPlayerNamesHistory((prev) => [name, ...prev.filter((existingName) => existingName.toLowerCase() !== name.toLowerCase())]);
     setPlayerName('');
+    setIsAddPlayerOpen(true);
+  }
+
+  function selectHistoryName(name) {
+    const normalizedName = normalizeName(name);
+    const isDuplicate = state.players.some((player) => player.name.toLowerCase() === normalizedName.toLowerCase());
+    if (isDuplicate) return;
+
+    setState((prev) => ({ ...prev, players: [...prev.players, makePlayer(normalizedName)] }));
+    setPlayerNamesHistory((prev) => [
+      normalizedName,
+      ...prev.filter((existingName) => existingName.toLowerCase() !== normalizedName.toLowerCase())
+    ]);
+    setPlayerName('');
+    setIsAddPlayerOpen(true);
+  }
+
+  function deleteHistoryName(name) {
+    setPlayerNamesHistory((prev) => prev.filter((existingName) => existingName.toLowerCase() !== name.toLowerCase()));
   }
 
   function increment(playerId, field) {
@@ -305,6 +494,8 @@ export default function PokerPointsPWA() {
     setPlayerName('');
     setDeletePlayerId(null);
     setConfirmAction(null);
+    setIsAddPlayerOpen(false);
+    setIsSettingsOpen(false);
   }
 
   return (
@@ -322,82 +513,26 @@ export default function PokerPointsPWA() {
         </header>
 
         <section className="mb-4">
-          <button
-            onClick={toggleSettings}
-            className="mb-3 flex w-full items-center justify-between rounded-3xl bg-zinc-900/90 p-4 text-left ring-1 ring-white/10 active:scale-[0.99]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-violet-600/20 p-2 text-violet-200">
-                <Settings2 size={20} />
-              </div>
-              <div>
-                <div className="font-bold">Глобальные параметры</div>
-                <div className="text-sm text-zinc-400">
-                  {formatNumber(state.settings.buyInPoints)}P · {formatNumber(state.settings.buyInChips)} фишек
+          <div className="mb-3 grid grid-cols-[1fr_auto] gap-2">
+            <button
+              onClick={openSettingsDialog}
+              className="flex min-w-0 items-center justify-between rounded-3xl bg-zinc-900/90 p-4 text-left active:scale-[0.99]"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="rounded-2xl bg-violet-600/20 p-2 text-violet-200">
+                  <Settings2 size={20} />
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate font-bold">Параметры</div>
+                  <div className="truncate text-sm text-zinc-400">
+                    {formatNumber(state.settings.buyInPoints)}P · {formatNumber(state.settings.buyInChips)} фишек
+                  </div>
                 </div>
               </div>
-            </div>
-            <span className="text-sm text-zinc-400">{state.settings.isCollapsed ? 'Открыть' : 'Скрыть'}</span>
-          </button>
+            </button>
 
-          <AnimatePresence initial={false}>
-            {!state.settings.isCollapsed && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <Card className="rounded-3xl border-white/10 bg-zinc-900 text-white">
-                  <CardContent className="space-y-3 p-4">
-                    <label className="block">
-                      <span className="mb-2 block text-sm text-zinc-300">Стоимость 1 бай-ина в поинтах</span>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min="0"
-                        value={state.settings.buyInPoints}
-                        onChange={(e) => updateSettings('buyInPoints', e.target.value)}
-                        className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
-                      />
-                    </label>
-                    <label className="block">
-                      <span className="mb-2 block text-sm text-zinc-300">Сколько фишек в 1 бай-ине</span>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min="0"
-                        value={state.settings.buyInChips}
-                        onChange={(e) => updateSettings('buyInChips', e.target.value)}
-                        className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
-                      />
-                    </label>
-                    <Button onClick={toggleSettings} className="h-12 w-full rounded-2xl bg-violet-600 font-bold hover:bg-violet-500">
-                      Сохранить и скрыть
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
-
-        <section className="mb-5 rounded-3xl bg-zinc-900 p-4 ring-1 ring-white/10">
-          <div className="mb-3 flex items-center gap-2 text-lg font-black">
-            <UserPlus size={20} /> Игроки
-          </div>
-          <div className="grid grid-cols-[1fr_56px] gap-2">
-            <input
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') addPlayer();
-              }}
-              placeholder="Имя игрока"
-              className="h-14 rounded-2xl border border-white/10 bg-black px-4 text-lg font-semibold outline-none placeholder:text-zinc-600 focus:border-violet-400"
-            />
-            <Button onClick={addPlayer} className="h-14 rounded-2xl bg-zinc-800 text-zinc-100 ring-1 ring-white/10 hover:bg-zinc-700">
-              <Plus size={22} />
+            <Button onClick={openAddPlayerDialog} className="h-full rounded-3xl bg-zinc-900 text-zinc-100 w-16 hover:bg-zinc-800 ">
+              <UserPlus size={18} className="size-6" />
             </Button>
           </div>
         </section>
@@ -448,6 +583,33 @@ export default function PokerPointsPWA() {
       <AnimatePresence>
         {playerToDelete && (
           <DeletePlayerDialog player={playerToDelete} onCancel={() => setDeletePlayerId(null)} onConfirm={confirmDeletePlayer} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isAddPlayerOpen && (
+          <AddPlayerDialog
+            value={playerName}
+            history={playerNamesHistory}
+            existingNames={existingPlayerNames}
+            onChange={setPlayerName}
+            onCancel={closeAddPlayerDialog}
+            onConfirm={addPlayer}
+            onSelectHistoryName={selectHistoryName}
+            onDeleteHistoryName={deleteHistoryName}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <SettingsDialog
+            buyInPoints={state.settings.buyInPoints}
+            buyInChips={state.settings.buyInChips}
+            onChange={updateSettings}
+            onCancel={closeSettingsDialog}
+            onConfirm={closeSettingsDialog}
+          />
         )}
       </AnimatePresence>
     </div>
