@@ -74,34 +74,51 @@ function makePlayer(name) {
   };
 }
 
+function AppDialog({ children, align = 'bottom', onClose }) {
+  const isTop = align === 'top';
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex justify-center overflow-hidden bg-black/60 px-4 ${
+        isTop ? 'items-start pt-[10dvh]' : 'items-end pb-4'
+      }`}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && onClose) onClose();
+      }}
+    >
+      <motion.div
+        initial={{ y: isTop ? 16 : 40, opacity: 0, scale: isTop ? 0.98 : 1 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: isTop ? 16 : 40, opacity: 0, scale: isTop ? 0.98 : 1 }}
+        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
 function ConfirmDialog({ action, onCancel, onConfirm }) {
   if (!action) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-4">
-      <motion.div
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 40, opacity: 0 }}
-        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
-      >
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold">Подтвердить уменьшение?</h3>
-            <p className="mt-1 text-sm text-zinc-400">Это действие уменьшит параметр игрока «{action.playerName}».</p>
-          </div>
+    <AppDialog onClose={onCancel}>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold">Подтвердить уменьшение?</h3>
+          <p className="mt-1 text-sm text-zinc-400">Это действие уменьшит параметр игрока «{action.playerName}».</p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
-            Отмена
-          </Button>
-          <Button onClick={onConfirm} className="h-12 rounded-2xl bg-red-600 text-white hover:bg-red-500">
-            Уменьшить
-          </Button>
-        </div>
-      </motion.div>
-    </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+          Отмена
+        </Button>
+        <Button onClick={onConfirm} className="h-12 rounded-2xl bg-red-600 text-white hover:bg-red-500">
+          Уменьшить
+        </Button>
+      </div>
+    </AppDialog>
   );
 }
 
@@ -109,162 +126,173 @@ function DeletePlayerDialog({ player, onCancel, onConfirm }) {
   if (!player) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-4">
-      <motion.div
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 40, opacity: 0 }}
-        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
-      >
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold">Удалить игрока?</h3>
-            <p className="mt-1 text-sm text-zinc-400">Игрок «{player.name}» будет удалён вместе со всеми его бай-инами и оплатами.</p>
-          </div>
+    <AppDialog onClose={onCancel}>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold">Удалить игрока?</h3>
+          <p className="mt-1 text-sm text-zinc-400">Игрок «{player.name}» будет удалён вместе со всеми его бай-инами и оплатами.</p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
-            Отмена
-          </Button>
-          <Button onClick={onConfirm} className="h-12 rounded-2xl bg-red-600 text-white hover:bg-red-500">
-            Удалить
-          </Button>
-        </div>
-      </motion.div>
-    </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+          Отмена
+        </Button>
+        <Button onClick={onConfirm} className="h-12 rounded-2xl bg-red-600 text-white hover:bg-red-500">
+          Удалить
+        </Button>
+      </div>
+    </AppDialog>
+  );
+}
+
+function ResetTournamentDialog({ onCancel, onConfirm }) {
+  return (
+    <AppDialog onClose={onCancel}>
+      <div className="mb-3">
+        <h3 className="text-lg font-bold">Сбросить турнир?</h3>
+        <p className="mt-1 text-sm text-zinc-400">Все игроки, бай-ины и оплаты будут удалены. История имён сохранится.</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+          Отмена
+        </Button>
+        <Button onClick={onConfirm} className="h-12 rounded-2xl bg-red-600 text-white hover:bg-red-500">
+          Сбросить
+        </Button>
+      </div>
+    </AppDialog>
   );
 }
 
 function AddPlayerDialog({ value, history, existingNames, onChange, onCancel, onConfirm, onSelectHistoryName, onDeleteHistoryName }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden bg-black/60 px-4 pt-[12dvh]">
-      <motion.div
-        initial={{ y: 16, opacity: 0, scale: 0.98 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: 16, opacity: 0, scale: 0.98 }}
-        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
-      >
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold">Добавить игрока</h3>
-          </div>
-          <button onClick={onCancel} className="rounded-full bg-white/10 p-2 text-zinc-300">
-            <X size={18} />
-          </button>
+    <AppDialog align="top" onClose={onCancel}>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold">Добавить игрока</h3>
         </div>
+        <button onClick={onCancel} className="rounded-full bg-white/10 p-2 text-zinc-300">
+          <X size={18} />
+        </button>
+      </div>
 
-        <input
-          value={value}
-          onFocus={(e) => {
-            setTimeout(() => {
-              e.currentTarget.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            }, 250);
-          }}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onConfirm();
-          }}
-          placeholder="Имя игрока"
-          className="mb-3 h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-lg font-semibold outline-none placeholder:text-zinc-600 focus:border-violet-400"
-        />
+      <input
+        value={value}
+        onFocus={(e) => {
+          setTimeout(() => {
+            e.currentTarget.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }, 250);
+        }}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') onConfirm();
+        }}
+        placeholder="Имя игрока"
+        className="mb-3 h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-lg font-semibold outline-none placeholder:text-zinc-600 focus:border-violet-400"
+      />
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
-            Отмена
-          </Button>
-          <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
-            Добавить
-          </Button>
-        </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+          Отмена
+        </Button>
+        <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
+          Добавить
+        </Button>
+      </div>
 
-        {history.length > 0 && (
-          <div className="mt-4">
-            <div className="mb-2 text-sm font-bold text-zinc-400">История имён</div>
-            <div className="max-h-[38dvh] space-y-2 overflow-y-auto pr-1 overscroll-contain">
-              {[...history]
-                .sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }))
-                .map((name) => {
-                  const isAlreadyAdded = existingNames.some((existingName) => existingName.toLowerCase() === name.toLowerCase());
+      {history.length > 0 && (
+        <div className="mt-4">
+          <div className="mb-2 text-sm font-bold text-zinc-400">История имён</div>
+          <div className="max-h-[38dvh] space-y-2 overflow-y-auto pr-1 overscroll-contain">
+            {[...history]
+              .sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }))
+              .map((name) => {
+                const isAlreadyAdded = existingNames.some((existingName) => existingName.toLowerCase() === name.toLowerCase());
 
-                  return (
-                    <div key={name} className="flex items-center gap-2 rounded-2xl bg-zinc-900 p-2 ring-1 ring-white/5">
-                      <button
-                        type="button"
-                        onClick={() => onSelectHistoryName(name)}
-                        disabled={isAlreadyAdded}
-                        className="min-w-0 flex-1 truncate rounded-xl px-3 py-2 text-left text-sm font-bold text-white disabled:text-zinc-600"
-                      >
-                        {name}
-                        {isAlreadyAdded ? ' · В игре' : ''}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDeleteHistoryName(name)}
-                        className="rounded-xl bg-white/10 p-2 text-zinc-400 active:scale-95"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  );
-                })}
-            </div>
+                return (
+                  <div key={name} className="flex items-center gap-2 rounded-2xl bg-zinc-900 p-2 ring-1 ring-white/5">
+                    <button
+                      type="button"
+                      onClick={() => onSelectHistoryName(name)}
+                      disabled={isAlreadyAdded}
+                      className="min-w-0 flex-1 truncate rounded-xl px-3 py-2 text-left text-sm font-bold text-white disabled:text-zinc-600"
+                    >
+                      {name}
+                      {isAlreadyAdded ? ' · В игре' : ''}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteHistoryName(name)}
+                      className="rounded-xl bg-white/10 p-2 text-zinc-400 active:scale-95"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                );
+              })}
           </div>
-        )}
-      </motion.div>
-    </div>
+        </div>
+      )}
+    </AppDialog>
   );
 }
 
-function SettingsDialog({ buyInPoints, buyInChips, onChange, onConfirm }) {
+function SettingsDialog({ buyInPoints, buyInChips, onChange, onClose }) {
+  const [pointsValue, setPointsValue] = useState(String(buyInPoints || ''));
+  const [chipsValue, setChipsValue] = useState(String(buyInChips || ''));
+
+  function normalizeNumberInput(value) {
+    const onlyDigits = value.replace(/\D/g, '');
+    return onlyDigits.replace(/^0+(?=\d)/, '');
+  }
+
+  function saveAndClose() {
+    onChange('buyInPoints', pointsValue === '' ? 0 : pointsValue);
+    onChange('buyInChips', chipsValue === '' ? 0 : chipsValue);
+    onClose();
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden bg-black/60 px-4 pt-[10dvh]">
-      <motion.div
-        initial={{ y: 16, opacity: 0, scale: 0.98 }}
-        animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: 16, opacity: 0, scale: 0.98 }}
-        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
-      >
-        <div className="mb-4 flex items-start justify-center gap-3">
-          <div>
-            <h3 className="text-lg font-bold">Параметры игры</h3>
-            <p className="mt-1 text-sm text-zinc-400">Настройки бай-ина и количества фишек.</p>
-          </div>
+    <AppDialog align="top" onClose={saveAndClose}>
+      <div className="mb-4 flex items-start justify-center gap-3">
+        <div>
+          <h3 className="text-lg font-bold">Параметры игры</h3>
+          <p className="mt-1 text-sm text-zinc-400">Настройки бай-ина и количества фишек.</p>
         </div>
+      </div>
 
-        <div className="space-y-3">
-          <label className="block">
-            <span className="mb-2 block text-sm text-zinc-300">Стоимость 1 бай-ина в поинтах</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="0"
-              value={buyInPoints}
-              onChange={(e) => onChange('buyInPoints', e.target.value)}
-              className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
-            />
-          </label>
+      <div className="space-y-3">
+        <label className="block">
+          <span className="mb-2 block text-sm text-zinc-300">Стоимость 1 бай-ина в поинтах</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={pointsValue}
+            onChange={(e) => setPointsValue(normalizeNumberInput(e.target.value))}
+            className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
+          />
+        </label>
 
-          <label className="block">
-            <span className="mb-2 block text-sm text-zinc-300">Сколько фишек в 1 бай-ине</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="0"
-              value={buyInChips}
-              onChange={(e) => onChange('buyInChips', e.target.value)}
-              className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
-            />
-          </label>
-        </div>
+        <label className="block">
+          <span className="mb-2 block text-sm text-zinc-300">Сколько фишек в 1 бай-ине</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={chipsValue}
+            onChange={(e) => setChipsValue(normalizeNumberInput(e.target.value))}
+            className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
+          />
+        </label>
+      </div>
 
-        <div className="mt-4 grid">
-          <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
-            Готово
-          </Button>
-        </div>
-      </motion.div>
-    </div>
+      <div className="mt-4 grid">
+        <Button onClick={saveAndClose} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
+          Готово
+        </Button>
+      </div>
+    </AppDialog>
   );
 }
 
@@ -359,6 +387,7 @@ export default function PokerPointsPWA() {
   const [deletePlayerId, setDeletePlayerId] = useState(null);
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [playerNamesHistory, setPlayerNamesHistory] = useState(loadPlayerNamesHistory);
 
   useEffect(() => {
@@ -370,7 +399,7 @@ export default function PokerPointsPWA() {
   }, [playerNamesHistory]);
 
   useEffect(() => {
-    const isModalOpen = Boolean(confirmAction || deletePlayerId || isAddPlayerOpen || isSettingsOpen);
+    const isModalOpen = Boolean(confirmAction || deletePlayerId || isAddPlayerOpen || isSettingsOpen || isResetDialogOpen);
     if (!isModalOpen) return;
 
     const previousBodyOverflow = document.body.style.overflow;
@@ -383,7 +412,7 @@ export default function PokerPointsPWA() {
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
     };
-  }, [confirmAction, deletePlayerId, isAddPlayerOpen, isSettingsOpen]);
+  }, [confirmAction, deletePlayerId, isAddPlayerOpen, isSettingsOpen, isResetDialogOpen]);
 
   const totals = useMemo(() => {
     const totalBuyIns = state.players.reduce((sum, p) => sum + p.buyIns, 0);
@@ -497,15 +526,22 @@ export default function PokerPointsPWA() {
     setDeletePlayerId(null);
   }
 
+  function openResetDialog() {
+    setIsResetDialogOpen(true);
+  }
+
+  function closeResetDialog() {
+    setIsResetDialogOpen(false);
+  }
+
   function resetTournament() {
-    const ok = window.confirm('Сбросить турнир? Все игроки и параметры будут удалены.');
-    if (!ok) return;
     setState(defaultState);
     setPlayerName('');
     setDeletePlayerId(null);
     setConfirmAction(null);
     setIsAddPlayerOpen(false);
     setIsSettingsOpen(false);
+    setIsResetDialogOpen(false);
   }
 
   return (
@@ -516,7 +552,7 @@ export default function PokerPointsPWA() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-violet-300">Poker points</p>
             </div>
-            <Button onClick={resetTournament} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300 hover:bg-zinc-800">
+            <Button onClick={openResetDialog} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300 hover:bg-zinc-800">
               Сброс
             </Button>
           </div>
@@ -617,10 +653,13 @@ export default function PokerPointsPWA() {
             buyInPoints={state.settings.buyInPoints}
             buyInChips={state.settings.buyInChips}
             onChange={updateSettings}
-            onCancel={closeSettingsDialog}
-            onConfirm={closeSettingsDialog}
+            onClose={closeSettingsDialog}
           />
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isResetDialogOpen && <ResetTournamentDialog onCancel={closeResetDialog} onConfirm={resetTournament} />}
       </AnimatePresence>
     </div>
   );
