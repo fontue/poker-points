@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/lib/format';
+import { totalMetrics } from '@/lib/metrics';
 import { metricTones } from '@/lib/ui';
 import { AppDialog } from './AppDialog';
 
@@ -23,11 +24,15 @@ export function TotalsDialog({ totals, onClose }) {
       </div>
 
       <div className="space-y-2">
-        <TotalRow label="Поинты в игре" value={totals.pointsInGame} suffix="P" tone={metricTones.points} />
-        <TotalRow label="Оплачено" value={totals.pointsPaidByTokens} suffix="P" tone={metricTones.paid} />
-        <TotalRow label="Призовые" value={totals.prizePoints} suffix="P" tone={metricTones.prize} />
-        <TotalRow label="Фишки" value={totals.chipsInGame} tone={metricTones.chips} />
-        <TotalRow label="Средний стек" value={totals.averageStack} tone={metricTones.neutral} />
+        {totalMetrics.map((metric) => (
+          <TotalRow
+            key={metric.key}
+            label={metric.label}
+            value={totals[metric.key]}
+            suffix={metric.suffix}
+            tone={metricTones[metric.tone]}
+          />
+        ))}
       </div>
 
       <div className="mt-4 grid">

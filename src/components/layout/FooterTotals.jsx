@@ -1,4 +1,5 @@
 import { formatNumber } from '@/lib/format';
+import { footerMetrics } from '@/lib/metrics';
 import { metricTones } from '@/lib/ui';
 
 function FooterStat({ label, value, suffix = '', tone }) {
@@ -21,9 +22,15 @@ export function FooterTotals({ totals, onOpen }) {
         onClick={onOpen}
         className="mb-2 grid w-full max-w-[430px] grid-cols-3 gap-1.5 rounded-2xl bg-zinc-950 p-1.5 text-left shadow-2xl ring-1 ring-white/10 active:scale-[0.99]"
       >
-        <FooterStat label="Поинты в игре" value={totals.pointsInGame} suffix="P" tone={metricTones.points} />
-        <FooterStat label="Оплачено" value={totals.pointsPaidByTokens} suffix="P" tone={metricTones.paid} />
-        <FooterStat label="Фишки" value={totals.chipsInGame} tone={metricTones.chips} />
+        {footerMetrics.map((metric) => (
+          <FooterStat
+            key={metric.key}
+            label={metric.label}
+            value={totals[metric.key]}
+            suffix={metric.suffix}
+            tone={metricTones[metric.tone]}
+          />
+        ))}
       </button>
     </footer>
   );
