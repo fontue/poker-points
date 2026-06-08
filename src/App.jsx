@@ -11,7 +11,8 @@ const PLAYER_NAMES_STORAGE_KEY = 'poker-points-player-names-v1';
 const defaultState = {
   settings: {
     buyInPoints: 2000,
-    buyInChips: 50000
+    buyInChips: 50000,
+    commission: 0
   },
   players: []
 };
@@ -216,6 +217,45 @@ function ResetTournamentDialog({ onCancel, onConfirm }) {
   );
 }
 
+function TotalsDialog({ totals, onClose }) {
+  return (
+    <AppDialog onClose={onClose}>
+      <div className="mb-4">
+        <h3 className="text-lg font-bold">Итоги игры</h3>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3 ring-1 ring-white/10">
+          <span className="text-sm font-bold text-violet-200/80">Поинты в игре</span>
+          <span className="text-lg font-black text-violet-100">{formatNumber(totals.pointsInGame)}P</span>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3 ring-1 ring-white/10">
+          <span className="text-sm font-bold text-orange-200/80">Оплачено</span>
+          <span className="text-lg font-black text-orange-100">{formatNumber(totals.pointsPaidByTokens)}P</span>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3 ring-1 ring-white/10">
+          <span className="text-sm font-bold text-yellow-200/80">Призовые</span>
+          <span className="text-lg font-black text-yellow-100">{formatNumber(totals.prizePoints)}P</span>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3 ring-1 ring-white/10">
+          <span className="text-sm font-bold text-emerald-200/80">Фишки</span>
+          <span className="text-lg font-black text-emerald-100">{formatNumber(totals.chipsInGame)}</span>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3 ring-1 ring-white/10">
+          <span className="text-sm font-bold text-zinc-300">Средний стек</span>
+          <span className="text-lg font-black text-zinc-100">{formatNumber(totals.averageStack)}</span>
+        </div>
+      </div>
+
+      <div className="mt-4 grid">
+        <Button onClick={onClose} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+          Готово
+        </Button>
+      </div>
+    </AppDialog>
+  );
+}
+
 function AddPlayerDialog({ value, history, existingNames, onChange, onCancel, onConfirm, onSelectHistoryName, onDeleteHistoryName }) {
   return (
     <AppDialog align="top" onClose={onCancel}>
@@ -289,9 +329,10 @@ function AddPlayerDialog({ value, history, existingNames, onChange, onCancel, on
   );
 }
 
-function SettingsDialog({ buyInPoints, buyInChips, onChange, onClose }) {
+function SettingsDialog({ buyInPoints, buyInChips, commission, onChange, onClose }) {
   const [pointsValue, setPointsValue] = useState(String(buyInPoints || ''));
   const [chipsValue, setChipsValue] = useState(String(buyInChips || ''));
+  const [commissionValue, setCommissionValue] = useState(String(commission || ''));
 
   function normalizeNumberInput(value) {
     const onlyDigits = value.replace(/\D/g, '');
@@ -301,6 +342,7 @@ function SettingsDialog({ buyInPoints, buyInChips, onChange, onClose }) {
   function saveAndClose() {
     onChange('buyInPoints', pointsValue === '' ? 0 : pointsValue);
     onChange('buyInChips', chipsValue === '' ? 0 : chipsValue);
+    onChange('commission', commissionValue === '' ? 0 : commissionValue);
     onClose();
   }
 
@@ -332,6 +374,17 @@ function SettingsDialog({ buyInPoints, buyInChips, onChange, onClose }) {
             inputMode="numeric"
             value={chipsValue}
             onChange={(e) => setChipsValue(normalizeNumberInput(e.target.value))}
+            className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-2 block text-sm text-zinc-300">Комиссия в поинтах</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={commissionValue}
+            onChange={(e) => setCommissionValue(normalizeNumberInput(e.target.value))}
             className="h-14 w-full rounded-2xl border border-white/10 bg-black px-4 text-xl font-bold outline-none focus:border-violet-400"
           />
         </label>
@@ -526,6 +579,7 @@ export default function PokerPointsPWA() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isReferenceOpen, setIsReferenceOpen] = useState(false);
+  const [isTotalsOpen, setIsTotalsOpen] = useState(false);
   const [playerNamesHistory, setPlayerNamesHistory] = useState(loadPlayerNamesHistory);
 
   useEffect(() => {
@@ -538,7 +592,14 @@ export default function PokerPointsPWA() {
 
   useEffect(() => {
     const isModalOpen = Boolean(
-      confirmAction || deletePlayerId || returnPlayerId || isAddPlayerOpen || isSettingsOpen || isResetDialogOpen || isReferenceOpen
+      confirmAction ||
+        deletePlayerId ||
+        returnPlayerId ||
+        isAddPlayerOpen ||
+        isSettingsOpen ||
+        isResetDialogOpen ||
+        isReferenceOpen ||
+        isTotalsOpen
     );
     if (!isModalOpen) return;
 
@@ -552,18 +613,33 @@ export default function PokerPointsPWA() {
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
     };
-  }, [confirmAction, deletePlayerId, returnPlayerId, isAddPlayerOpen, isSettingsOpen, isResetDialogOpen, isReferenceOpen]);
+  }, [
+    confirmAction,
+    deletePlayerId,
+    returnPlayerId,
+    isAddPlayerOpen,
+    isSettingsOpen,
+    isResetDialogOpen,
+    isReferenceOpen,
+    isTotalsOpen
+  ]);
 
   const totals = useMemo(() => {
     const totalBuyIns = state.players.reduce((sum, p) => sum + p.buyIns, 0);
     const paidTokens = state.players.reduce((sum, p) => sum + p.paidToken, 0);
+    const activePlayersCount = state.players.filter((p) => !p.isEliminated).length;
+    const chipsInGame = totalBuyIns * state.settings.buyInChips;
+    const pointsInGame = totalBuyIns * state.settings.buyInPoints;
 
     return {
-      pointsInGame: totalBuyIns * state.settings.buyInPoints,
+      pointsInGame,
       pointsPaidByTokens: paidTokens * state.settings.buyInPoints,
-      chipsInGame: totalBuyIns * state.settings.buyInChips
+      prizePoints: Math.max(0, pointsInGame - state.settings.commission),
+      chipsInGame,
+      activePlayersCount,
+      averageStack: activePlayersCount > 0 ? Math.floor(chipsInGame / activePlayersCount) : 0
     };
-  }, [state.players, state.settings.buyInPoints, state.settings.buyInChips]);
+  }, [state.players, state.settings.buyInPoints, state.settings.buyInChips, state.settings.commission]);
 
   const playerToDelete = useMemo(
     () => state.players.find((player) => player.id === deletePlayerId) || null,
@@ -734,6 +810,7 @@ export default function PokerPointsPWA() {
     setIsSettingsOpen(false);
     setIsResetDialogOpen(false);
     setIsReferenceOpen(false);
+    setIsTotalsOpen(false);
   }
 
   return (
@@ -769,7 +846,8 @@ export default function PokerPointsPWA() {
                 <div className="min-w-0">
                   <div className="truncate font-bold">Параметры</div>
                   <div className="truncate text-sm text-zinc-400">
-                    {formatNumber(state.settings.buyInPoints)}P · {formatNumber(state.settings.buyInChips)} фишек
+                    {formatNumber(state.settings.buyInPoints)}P · {formatNumber(state.settings.buyInChips)} фишек · комиссия{' '}
+                    {formatNumber(state.settings.commission)}P
                   </div>
                 </div>
               </div>
@@ -806,7 +884,11 @@ export default function PokerPointsPWA() {
       </div>
 
       <footer className="fixed inset-x-0 bottom-0 z-40 flex justify-center bg-black/80 px-3 pb-2 pt-1 backdrop-blur-xl">
-        <div className="grid w-full max-w-[430px] grid-cols-3 gap-1.5 rounded-2xl bg-zinc-950 mb-2 p-1.5 shadow-2xl ring-1 ring-white/10">
+        <button
+          type="button"
+          onClick={() => setIsTotalsOpen(true)}
+          className="mb-2 grid w-full max-w-[430px] grid-cols-3 gap-1.5 rounded-2xl bg-zinc-950 p-1.5 text-left shadow-2xl ring-1 ring-white/10 active:scale-[0.99]"
+        >
           <div className="rounded-xl bg-violet-600/15 px-2 py-1.5 text-center ring-1 ring-violet-500/20">
             <div className="text-[9px] font-bold uppercase tracking-tight text-violet-200/80">Поинты в игре</div>
             <div className="text-sm font-black text-violet-100">{formatNumber(totals.pointsInGame)}P</div>
@@ -819,7 +901,7 @@ export default function PokerPointsPWA() {
             <div className="text-[9px] font-bold uppercase tracking-tight text-emerald-200/80">Фишки</div>
             <div className="text-sm font-black text-emerald-100">{formatNumber(totals.chipsInGame)}</div>
           </div>
-        </div>
+        </button>
       </footer>
 
       <AnimatePresence>
@@ -858,6 +940,7 @@ export default function PokerPointsPWA() {
           <SettingsDialog
             buyInPoints={state.settings.buyInPoints}
             buyInChips={state.settings.buyInChips}
+            commission={state.settings.commission}
             onChange={updateSettings}
             onClose={closeSettingsDialog}
           />
@@ -869,6 +952,8 @@ export default function PokerPointsPWA() {
       </AnimatePresence>
 
       <AnimatePresence>{isReferenceOpen && <ReferenceDialog onClose={closeReferenceDialog} />}</AnimatePresence>
+
+      <AnimatePresence>{isTotalsOpen && <TotalsDialog totals={totals} onClose={() => setIsTotalsOpen(false)} />}</AnimatePresence>
     </div>
   );
 }
