@@ -5,8 +5,27 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatNumber } from '@/lib/format';
 import { getPlayerCardClass } from '@/lib/ui';
 import { CounterRow } from './CounterRow';
+import type { Player, PlayerCounterField } from '@/lib/game';
 
-export function PlayerCard({ player, buyInPoints, place, onIncrement, onRequestDecrement, onToggleEliminated, onDelete }) {
+type PlayerCardProps = {
+  player: Player;
+  buyInPoints: number;
+  place?: number;
+  onIncrement: (playerId: string, field: PlayerCounterField) => void;
+  onRequestDecrement: (playerId: string, field: PlayerCounterField) => void;
+  onToggleEliminated: (playerId: string) => void;
+  onDelete: (playerId: string) => void;
+};
+
+export function PlayerCard({
+  player,
+  buyInPoints,
+  place,
+  onIncrement,
+  onRequestDecrement,
+  onToggleEliminated,
+  onDelete
+}: PlayerCardProps) {
   const unpaid = Math.max(0, player.buyIns - player.paidToken);
   const unpaidPoints = unpaid * buyInPoints;
   const isPaid = unpaid === 0 && player.buyIns > 0;

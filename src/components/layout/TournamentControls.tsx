@@ -1,8 +1,15 @@
 import { UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsSummaryButton } from './SettingsSummaryButton';
+import type { Settings } from '@/lib/game';
 
-export function TournamentControls({ settings, onSettings, onAddPlayer }) {
+type TournamentControlsProps = {
+  settings: Settings;
+  onSettings: () => void;
+  onAddPlayer: () => void;
+};
+
+export function TournamentControls({ settings, onSettings, onAddPlayer }: TournamentControlsProps) {
   return (
     <section className="mb-4">
       <div className="mb-3 grid grid-cols-[1fr_auto] gap-2">

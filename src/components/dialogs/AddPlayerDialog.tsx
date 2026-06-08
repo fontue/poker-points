@@ -2,6 +2,17 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AppDialog } from './AppDialog';
 
+type AddPlayerDialogProps = {
+  value: string;
+  history: string[];
+  existingNames: string[];
+  onChange: (value: string) => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+  onSelectHistoryName: (name: string) => void;
+  onDeleteHistoryName: (name: string) => void;
+};
+
 export function AddPlayerDialog({
   value,
   history,
@@ -11,7 +22,7 @@ export function AddPlayerDialog({
   onConfirm,
   onSelectHistoryName,
   onDeleteHistoryName
-}) {
+}: AddPlayerDialogProps) {
   return (
     <AppDialog align="top" onClose={onCancel}>
       <div className="mb-4 flex items-start justify-between gap-3">

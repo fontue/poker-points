@@ -1,7 +1,13 @@
 import { Settings2 } from 'lucide-react';
 import { formatNumber } from '@/lib/format';
+import type { Settings } from '@/lib/game';
 
-export function SettingsSummaryButton({ settings, onClick }) {
+type SettingsSummaryButtonProps = {
+  settings: Settings;
+  onClick: () => void;
+};
+
+export function SettingsSummaryButton({ settings, onClick }: SettingsSummaryButtonProps) {
   return (
     <button
       onClick={onClick}

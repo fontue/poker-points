@@ -3,8 +3,17 @@ import { formatNumber } from '@/lib/format';
 import { totalMetrics } from '@/lib/metrics';
 import { metricTones } from '@/lib/ui';
 import { AppDialog } from './AppDialog';
+import type { Totals } from '@/lib/game';
+import type { MetricTone } from '@/lib/ui';
 
-function TotalRow({ label, value, suffix = '', tone }) {
+type TotalRowProps = {
+  label: string;
+  value: number;
+  suffix?: string;
+  tone: MetricTone;
+};
+
+function TotalRow({ label, value, suffix = '', tone }: TotalRowProps) {
   return (
     <div className="flex items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3 ring-1 ring-white/10">
       <span className={`text-sm font-bold ${tone.label}`}>{label}</span>
@@ -16,7 +25,12 @@ function TotalRow({ label, value, suffix = '', tone }) {
   );
 }
 
-export function TotalsDialog({ totals, onClose }) {
+type TotalsDialogProps = {
+  totals: Totals;
+  onClose: () => void;
+};
+
+export function TotalsDialog({ totals, onClose }: TotalsDialogProps) {
   return (
     <AppDialog onClose={onClose}>
       <div className="mb-4">

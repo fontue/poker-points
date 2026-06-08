@@ -1,7 +1,12 @@
 import { BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export function AppHeader({ onReference, onReset }) {
+type AppHeaderProps = {
+  onReference: () => void;
+  onReset: () => void;
+};
+
+export function AppHeader({ onReference, onReset }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-20 -mx-4 mb-4 bg-black/35 px-4 pb-3 pt-2 backdrop-blur-xl">
       <div className="flex items-center justify-between gap-3">

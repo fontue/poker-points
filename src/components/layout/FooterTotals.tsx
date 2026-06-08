@@ -1,10 +1,19 @@
 import { formatNumber } from '@/lib/format';
 import { footerMetrics } from '@/lib/metrics';
 import { metricTones } from '@/lib/ui';
+import type { Totals } from '@/lib/game';
+import type { MetricTone } from '@/lib/ui';
 
-function FooterStat({ label, value, suffix = '', tone }) {
+type FooterStatProps = {
+  label: string;
+  value: number;
+  suffix?: string;
+  tone: MetricTone;
+};
+
+function FooterStat({ label, value, suffix = '', tone }: FooterStatProps) {
   return (
-    <div className={`rounded-xl px-2 py-1.5 text-center ring-1 ${tone.footer}`}>
+    <div className={`rounded-xl px-2 py-1.5 text-center ring-1 ${tone.footer || ''}`}>
       <div className={`text-[9px] font-bold uppercase tracking-tight ${tone.label}`}>{label}</div>
       <div className={`text-sm font-black ${tone.value}`}>
         {formatNumber(value)}
@@ -14,7 +23,12 @@ function FooterStat({ label, value, suffix = '', tone }) {
   );
 }
 
-export function FooterTotals({ totals, onOpen }) {
+type FooterTotalsProps = {
+  totals: Totals;
+  onOpen: () => void;
+};
+
+export function FooterTotals({ totals, onOpen }: FooterTotalsProps) {
   return (
     <footer className="fixed inset-x-0 bottom-0 z-40 flex justify-center bg-black/80 px-3 pb-2 pt-1 backdrop-blur-xl">
       <button

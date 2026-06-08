@@ -1,37 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, X } from 'lucide-react';
+import { referenceSections } from '@/content/referenceSections';
 
-const referenceSections = [
-  {
-    id: 'general-rules',
-    title: 'Общие правила',
-    content: 'Тестовый контент раздела «Общие правила».'
-  },
-  {
-    id: 'table-actions',
-    title: 'Правила действий за столом',
-    content: 'Тестовый контент раздела «Правила действий за столом».'
-  },
-  {
-    id: 'card-opening',
-    title: 'Правила открытия карт',
-    content: 'Тестовый контент раздела «Правила открытия карт».'
-  },
-  {
-    id: 'dealing-errors',
-    title: 'Решение ошибок при раздаче',
-    content: 'Тестовый контент раздела «Решение ошибок при раздаче».'
-  },
-  {
-    id: 'tournament-settings',
-    title: 'Параметры турнира',
-    content: 'Тестовый контент раздела «Параметры турнира».'
-  }
-];
+type ReferenceDialogProps = {
+  onClose: () => void;
+};
 
-export function ReferenceDialog({ onClose }) {
-  const [activeSection, setActiveSection] = useState(null);
+export function ReferenceDialog({ onClose }: ReferenceDialogProps) {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   const currentSection = referenceSections.find((section) => section.id === activeSection);
 
   return (

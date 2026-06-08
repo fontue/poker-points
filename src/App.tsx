@@ -7,16 +7,18 @@ import { TournamentControls } from '@/components/layout/TournamentControls';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { usePlayerNameHistory } from '@/hooks/usePlayerNameHistory';
 import { useTournamentState } from '@/hooks/useTournamentState';
-import './App.css';
+import type { PlayerCounterField } from '@/lib/game';
+import type { AppModal } from '@/lib/modal';
 
 export default function PokerPointsPWA() {
   const tournament = useTournamentState();
   const playerNameHistory = usePlayerNameHistory();
   const [playerName, setPlayerName] = useState('');
-  const [modal, setModal] = useState(null);
+  const [modal, setModal] = useState<AppModal | null>(null);
 
   useBodyScrollLock(Boolean(modal));
-  const modalPlayer = modal?.playerId ? tournament.state.players.find((player) => player.id === modal.playerId) || null : null;
+  const modalPlayer =
+    modal && 'playerId' in modal ? tournament.state.players.find((player) => player.id === modal.playerId) || null : null;
 
   function closeModal() {
     setModal(null);
@@ -27,7 +29,7 @@ export default function PokerPointsPWA() {
     setModal({ type: 'add-player' });
   }
 
-  function addPlayerByName(name) {
+  function addPlayerByName(name: string) {
     const normalizedName = tournament.addPlayerByName(name);
     if (!normalizedName) return;
 
@@ -36,11 +38,11 @@ export default function PokerPointsPWA() {
     setModal({ type: 'add-player' });
   }
 
-  function increment(playerId, field) {
+  function increment(playerId: string, field: PlayerCounterField) {
     tournament.increment(playerId, field);
   }
 
-  function requestDecrement(playerId, field) {
+  function requestDecrement(playerId: string, field: PlayerCounterField) {
     const player = tournament.state.players.find((candidate) => candidate.id === playerId);
     if (!player || player[field] <= 0) return;
     setModal({ type: 'decrement-player-field', playerId, field, playerName: player.name });
@@ -52,7 +54,7 @@ export default function PokerPointsPWA() {
     closeModal();
   }
 
-  function toggleEliminated(playerId) {
+  function toggleEliminated(playerId: string) {
     const player = tournament.state.players.find((candidate) => candidate.id === playerId);
     if (!player) return;
 

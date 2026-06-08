@@ -3,13 +3,22 @@ import { Button } from '@/components/ui/button';
 import { normalizeNumberInput } from '@/lib/format';
 import { settingFields } from '@/lib/settings';
 import { AppDialog } from './AppDialog';
+import type { Settings } from '@/lib/game';
 
-export function SettingsDialog({ settings, onChange, onClose }) {
+type SettingsValues = Record<keyof Settings, string>;
+
+type SettingsDialogProps = {
+  settings: Settings;
+  onChange: (settingsPatch: Partial<Settings>) => void;
+  onClose: () => void;
+};
+
+export function SettingsDialog({ settings, onChange, onClose }: SettingsDialogProps) {
   const [values, setValues] = useState(() =>
-    Object.fromEntries(settingFields.map((field) => [field.key, String(settings[field.key] || '')]))
+    Object.fromEntries(settingFields.map((field) => [field.key, String(settings[field.key] || '')])) as SettingsValues
   );
 
-  function updateValue(key, value) {
+  function updateValue(key: keyof Settings, value: string) {
     setValues((prev) => ({ ...prev, [key]: normalizeNumberInput(value) }));
   }
 

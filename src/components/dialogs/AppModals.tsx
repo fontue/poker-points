@@ -4,8 +4,39 @@ import { ConfirmActionDialog } from './ConfirmActionDialog';
 import { ReferenceDialog } from './ReferenceDialog';
 import { SettingsDialog } from './SettingsDialog';
 import { TotalsDialog } from './TotalsDialog';
+import type { Player, Settings, Totals } from '@/lib/game';
+import type { AppModal } from '@/lib/modal';
+import type { ConfirmActionDialogProps } from './ConfirmActionDialog';
 
-function getConfirmDialogProps(modal, modalPlayer, actions) {
+type AppModalsProps = {
+  modal: AppModal | null;
+  modalPlayer: Player | null;
+  settings: Settings;
+  totals: Totals;
+  playerName: string;
+  playerNamesHistory: string[];
+  existingPlayerNames: string[];
+  onPlayerNameChange: (name: string) => void;
+  onClose: () => void;
+  onUpdateSettings: (settingsPatch: Partial<Settings>) => void;
+  onAddPlayer: (name: string) => void;
+  onDeleteHistoryName: (name: string) => void;
+  onConfirmDecrement: () => void;
+  onConfirmDeletePlayer: () => void;
+  onConfirmReturnPlayer: () => void;
+  onResetTournament: () => void;
+};
+
+type ConfirmActions = Pick<
+  AppModalsProps,
+  'onConfirmDecrement' | 'onConfirmDeletePlayer' | 'onConfirmReturnPlayer' | 'onResetTournament'
+>;
+
+function getConfirmDialogProps(
+  modal: AppModal | null,
+  modalPlayer: Player | null,
+  actions: ConfirmActions
+): Omit<ConfirmActionDialogProps, 'onCancel'> | null {
   if (!modal) return null;
 
   if (modal.type === 'decrement-player-field') {
@@ -31,7 +62,7 @@ function getConfirmDialogProps(modal, modalPlayer, actions) {
       title: 'Вернуть игрока в игру?',
       description: `Игрок «${modalPlayer.name}» снова будет отмечен как «В игре».`,
       confirmText: 'Вернуть',
-      confirmTone: 'primary',
+      confirmTone: 'primary' as const,
       onConfirm: actions.onConfirmReturnPlayer
     };
   }
@@ -65,7 +96,7 @@ export function AppModals({
   onConfirmDeletePlayer,
   onConfirmReturnPlayer,
   onResetTournament
-}) {
+}: AppModalsProps) {
   const confirmDialogProps = getConfirmDialogProps(modal, modalPlayer, {
     onConfirmDecrement,
     onConfirmDeletePlayer,
@@ -75,7 +106,7 @@ export function AppModals({
 
   function renderModal() {
     if (confirmDialogProps) {
-      return <ConfirmActionDialog key={modal.type} {...confirmDialogProps} onCancel={onClose} />;
+      return <ConfirmActionDialog key={modal?.type || 'confirm'} {...confirmDialogProps} onCancel={onClose} />;
     }
 
     if (modal?.type === 'add-player') {

@@ -1,5 +1,16 @@
 import { AnimatePresence } from 'framer-motion';
 import { PlayerCard } from './PlayerCard';
+import type { Player, PlayerCounterField } from '@/lib/game';
+
+type PlayersListProps = {
+  players: Player[];
+  buyInPoints: number;
+  eliminatedPlaces: Map<string, number>;
+  onIncrement: (playerId: string, field: PlayerCounterField) => void;
+  onRequestDecrement: (playerId: string, field: PlayerCounterField) => void;
+  onToggleEliminated: (playerId: string) => void;
+  onDelete: (playerId: string) => void;
+};
 
 export function PlayersList({
   players,
@@ -9,7 +20,7 @@ export function PlayersList({
   onRequestDecrement,
   onToggleEliminated,
   onDelete
-}) {
+}: PlayersListProps) {
   return (
     <section className="space-y-4">
       <AnimatePresence>

@@ -1,6 +1,13 @@
 import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 
-export function AppDialog({ children, align = 'bottom', onClose }) {
+type AppDialogProps = {
+  children: ReactNode;
+  align?: 'top' | 'bottom';
+  onClose?: () => void;
+};
+
+export function AppDialog({ children, align = 'bottom', onClose }: AppDialogProps) {
   const isTop = align === 'top';
 
   return (

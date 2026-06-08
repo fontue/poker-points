@@ -1,9 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { AppDialog } from './AppDialog';
 
+type ConfirmTone = 'destructive' | 'primary';
+
 const confirmButtonClasses = {
   destructive: 'bg-red-600 text-white',
   primary: 'bg-violet-600 text-white'
+} satisfies Record<ConfirmTone, string>;
+
+export type ConfirmActionDialogProps = {
+  title: string;
+  description?: string;
+  confirmText: string;
+  confirmTone?: ConfirmTone;
+  onCancel: () => void;
+  onConfirm: () => void;
 };
 
 export function ConfirmActionDialog({
@@ -13,7 +24,7 @@ export function ConfirmActionDialog({
   confirmTone = 'destructive',
   onCancel,
   onConfirm
-}) {
+}: ConfirmActionDialogProps) {
   return (
     <AppDialog onClose={onCancel}>
       <div className="mb-3">

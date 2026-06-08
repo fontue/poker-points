@@ -1,7 +1,14 @@
 import { Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export function CounterRow({ value, colorClass, onInc, onDec }) {
+type CounterRowProps = {
+  value: number;
+  colorClass: string;
+  onInc: () => void;
+  onDec: () => void;
+};
+
+export function CounterRow({ value, colorClass, onInc, onDec }: CounterRowProps) {
   return (
     <div className="rounded-2xl bg-zinc-900/80 p-2 ring-1 ring-white/5">
       <div className="flex gap-1">
