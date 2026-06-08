@@ -16,6 +16,17 @@ const defaultState = {
   players: []
 };
 
+function normalizePlayer(player, index) {
+  const isEliminated = Boolean(player.isEliminated);
+  const eliminatedAt = Number(player.eliminatedAt);
+
+  return {
+    ...player,
+    isEliminated,
+    eliminatedAt: isEliminated ? (Number.isFinite(eliminatedAt) ? eliminatedAt : index) : null
+  };
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -23,7 +34,7 @@ function loadState() {
     const parsed = JSON.parse(raw);
     return {
       settings: { ...defaultState.settings, ...(parsed.settings || {}) },
-      players: Array.isArray(parsed.players) ? parsed.players : []
+      players: Array.isArray(parsed.players) ? parsed.players.map(normalizePlayer) : []
     };
   } catch {
     return defaultState;
@@ -68,8 +79,27 @@ function makePlayer(name) {
     id: createId(),
     name: name.trim(),
     buyIns: 1,
-    paidToken: 0
+    paidToken: 0,
+    isEliminated: false,
+    eliminatedAt: null
   };
+}
+
+function getEliminatedPlaceMap(players) {
+  const eliminatedPlayers = players
+    .map((player, index) => ({ player, index }))
+    .filter(({ player }) => player.isEliminated)
+    .sort((a, b) => (a.player.eliminatedAt || 0) - (b.player.eliminatedAt || 0) || a.index - b.index);
+
+  return new Map(eliminatedPlayers.map(({ player }, index) => [player.id, players.length - index]));
+}
+
+function getPlayerCardClass(isEliminated, place) {
+  if (!isEliminated) return 'bg-zinc-900';
+  if (place === 1) return 'bg-yellow-500/35 ring-yellow-300/50';
+  if (place === 2) return 'bg-zinc-300/30 ring-zinc-100/45';
+  if (place === 3) return 'bg-orange-700/45 ring-orange-300/50';
+  return 'bg-red-500/10 ring-red-400/15';
 }
 
 function AppDialog({ children, align = 'bottom', onClose }) {
@@ -138,6 +168,28 @@ function DeletePlayerDialog({ player, onCancel, onConfirm }) {
         </Button>
         <Button onClick={onConfirm} className="h-12 rounded-2xl bg-red-600 text-white hover:bg-red-500">
           Удалить
+        </Button>
+      </div>
+    </AppDialog>
+  );
+}
+
+function ReturnPlayerDialog({ player, onCancel, onConfirm }) {
+  if (!player) return null;
+
+  return (
+    <AppDialog onClose={onCancel}>
+      <div className="mb-3">
+        <h3 className="text-lg font-bold">Вернуть игрока в игру?</h3>
+        <p className="mt-1 text-sm text-zinc-400">Игрок «{player.name}» снова будет отмечен как «В игре».</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+          Отмена
+        </Button>
+        <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 text-white hover:bg-violet-500">
+          Вернуть
         </Button>
       </div>
     </AppDialog>
@@ -394,14 +446,19 @@ function CounterRow({ value, colorClass, onInc, onDec }) {
   );
 }
 
-function PlayerCard({ player, buyInPoints, onIncrement, onRequestDecrement, onDelete }) {
+function PlayerCard({ player, buyInPoints, place, onIncrement, onRequestDecrement, onToggleEliminated, onDelete }) {
   const unpaid = Math.max(0, player.buyIns - player.paidToken);
   const unpaidPoints = unpaid * buyInPoints;
   const isPaid = unpaid === 0 && player.buyIns > 0;
+  const isEliminated = Boolean(player.isEliminated);
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}>
-      <Card className="overflow-hidden rounded-3xl border-white/10 bg-zinc-900 text-white shadow-xl">
+      <Card
+        className={`overflow-hidden rounded-3xl border-white/10 text-white shadow-xl transition-colors ${
+          getPlayerCardClass(isEliminated, place)
+        }`}
+      >
         <CardContent className="pl-3 pr-3">
           <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="-ml-1 min-w-0 truncate text-xl font-black tracking-tight">{player.name}</h2>
@@ -409,7 +466,7 @@ function PlayerCard({ player, buyInPoints, onIncrement, onRequestDecrement, onDe
             <div className="flex items-center gap-2">
               <div
                 className={`flex items-center gap-2 rounded-2xl px-3 ring-1 ${
-                  isPaid ? 'bg-emerald-500/15 ring-emerald-500/25' : 'bg-red-500/15 ring-red-500/25'
+                  isPaid ? 'bg-[#17302a] ring-emerald-500/25' : 'bg-[#39201f] ring-red-500/25'
                 }`}
               >
                 <div className={`text-[11px] font-bold uppercase tracking-wide ${isPaid ? 'text-emerald-200/80' : 'text-red-200/80'}`}>
@@ -443,6 +500,15 @@ function PlayerCard({ player, buyInPoints, onIncrement, onRequestDecrement, onDe
               onInc={() => onIncrement(player.id, 'paidToken')}
               onDec={() => onRequestDecrement(player.id, 'paidToken')}
             />
+
+            <Button
+              onClick={() => onToggleEliminated(player.id)}
+              className={`h-full min-h-12 rounded-2xl bg-zinc-800 px-2 text-xs font-black hover:bg-zinc-700 ${
+                isEliminated ? 'text-red-300' : 'text-zinc-200'
+              }`}
+            >
+              {isEliminated ? 'Выбыл' : 'В игре'}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -455,6 +521,7 @@ export default function PokerPointsPWA() {
   const [playerName, setPlayerName] = useState('');
   const [confirmAction, setConfirmAction] = useState(null);
   const [deletePlayerId, setDeletePlayerId] = useState(null);
+  const [returnPlayerId, setReturnPlayerId] = useState(null);
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -471,7 +538,7 @@ export default function PokerPointsPWA() {
 
   useEffect(() => {
     const isModalOpen = Boolean(
-      confirmAction || deletePlayerId || isAddPlayerOpen || isSettingsOpen || isResetDialogOpen || isReferenceOpen
+      confirmAction || deletePlayerId || returnPlayerId || isAddPlayerOpen || isSettingsOpen || isResetDialogOpen || isReferenceOpen
     );
     if (!isModalOpen) return;
 
@@ -485,7 +552,7 @@ export default function PokerPointsPWA() {
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
     };
-  }, [confirmAction, deletePlayerId, isAddPlayerOpen, isSettingsOpen, isResetDialogOpen, isReferenceOpen]);
+  }, [confirmAction, deletePlayerId, returnPlayerId, isAddPlayerOpen, isSettingsOpen, isResetDialogOpen, isReferenceOpen]);
 
   const totals = useMemo(() => {
     const totalBuyIns = state.players.reduce((sum, p) => sum + p.buyIns, 0);
@@ -502,6 +569,13 @@ export default function PokerPointsPWA() {
     () => state.players.find((player) => player.id === deletePlayerId) || null,
     [state.players, deletePlayerId]
   );
+
+  const playerToReturn = useMemo(
+    () => state.players.find((player) => player.id === returnPlayerId) || null,
+    [state.players, returnPlayerId]
+  );
+
+  const eliminatedPlaces = useMemo(() => getEliminatedPlaceMap(state.players), [state.players]);
 
   const existingPlayerNames = useMemo(() => state.players.map((player) => player.name), [state.players]);
 
@@ -587,6 +661,33 @@ export default function PokerPointsPWA() {
     }));
   }
 
+  function toggleEliminated(playerId) {
+    const player = state.players.find((p) => p.id === playerId);
+    if (!player) return;
+
+    if (player.isEliminated) {
+      setReturnPlayerId(playerId);
+      return;
+    }
+
+    setState((prev) => ({
+      ...prev,
+      players: prev.players.map((p) =>
+        p.id === playerId ? { ...p, isEliminated: true, eliminatedAt: Date.now() } : p
+      )
+    }));
+  }
+
+  function confirmReturnPlayer() {
+    if (!returnPlayerId) return;
+
+    setState((prev) => ({
+      ...prev,
+      players: prev.players.map((p) => (p.id === returnPlayerId ? { ...p, isEliminated: false, eliminatedAt: null } : p))
+    }));
+    setReturnPlayerId(null);
+  }
+
   function requestDecrement(playerId, field) {
     const player = state.players.find((p) => p.id === playerId);
     if (!player || player[field] <= 0) return;
@@ -627,6 +728,7 @@ export default function PokerPointsPWA() {
     setState(defaultState);
     setPlayerName('');
     setDeletePlayerId(null);
+    setReturnPlayerId(null);
     setConfirmAction(null);
     setIsAddPlayerOpen(false);
     setIsSettingsOpen(false);
@@ -686,8 +788,10 @@ export default function PokerPointsPWA() {
                 key={player.id}
                 player={player}
                 buyInPoints={state.settings.buyInPoints}
+                place={eliminatedPlaces.get(player.id)}
                 onIncrement={increment}
                 onRequestDecrement={requestDecrement}
+                onToggleEliminated={toggleEliminated}
                 onDelete={requestDeletePlayer}
               />
             ))}
@@ -725,6 +829,12 @@ export default function PokerPointsPWA() {
       <AnimatePresence>
         {playerToDelete && (
           <DeletePlayerDialog player={playerToDelete} onCancel={() => setDeletePlayerId(null)} onConfirm={confirmDeletePlayer} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {playerToReturn && (
+          <ReturnPlayerDialog player={playerToReturn} onCancel={() => setReturnPlayerId(null)} onConfirm={confirmReturnPlayer} />
         )}
       </AnimatePresence>
 
