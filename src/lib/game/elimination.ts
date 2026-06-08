@@ -1,17 +1,23 @@
 import type { Player, TournamentState } from './types';
+import { normalizeCounter, normalizePlayerCounters, updatePlayer } from './invariants';
 
-export function normalizePlayer(player: Partial<Player>, index: number): Player {
+type LegacyPlayer = Partial<Player> & {
+  paidToken?: unknown;
+};
+
+export function normalizePlayer(player: LegacyPlayer, index: number): Player {
   const isEliminated = Boolean(player.isEliminated);
   const eliminatedAt = Number(player.eliminatedAt);
+  const paidEntries = player.paidEntries ?? player.paidToken;
 
-  return {
+  return normalizePlayerCounters({
     id: String(player.id || ''),
     name: String(player.name || ''),
-    buyIns: Number(player.buyIns) || 0,
-    paidToken: Number(player.paidToken) || 0,
+    buyIns: normalizeCounter(player.buyIns),
+    paidEntries: normalizeCounter(paidEntries),
     isEliminated,
     eliminatedAt: isEliminated ? (Number.isFinite(eliminatedAt) ? eliminatedAt : index) : null
-  };
+  });
 }
 
 export function getEliminatedPlaceMap(players: Player[]): Map<string, number> {
@@ -23,20 +29,10 @@ export function getEliminatedPlaceMap(players: Player[]): Map<string, number> {
   return new Map(eliminatedPlayers.map(({ player }, index) => [player.id, players.length - index]));
 }
 
-export function eliminatePlayer(state: TournamentState, playerId: string): TournamentState {
-  return {
-    ...state,
-    players: state.players.map((player) =>
-      player.id === playerId ? { ...player, isEliminated: true, eliminatedAt: Date.now() } : player
-    )
-  };
+export function eliminatePlayer(state: TournamentState, playerId: string, eliminatedAt: number): TournamentState {
+  return updatePlayer(state, playerId, (player) => ({ ...player, isEliminated: true, eliminatedAt }));
 }
 
 export function returnPlayerToGame(state: TournamentState, playerId: string): TournamentState {
-  return {
-    ...state,
-    players: state.players.map((player) =>
-      player.id === playerId ? { ...player, isEliminated: false, eliminatedAt: null } : player
-    )
-  };
+  return updatePlayer(state, playerId, (player) => ({ ...player, isEliminated: false, eliminatedAt: null }));
 }

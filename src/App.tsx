@@ -4,29 +4,30 @@ import { PlayersList } from '@/components/game/PlayersList';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { FooterTotals } from '@/components/layout/FooterTotals';
 import { TournamentControls } from '@/components/layout/TournamentControls';
+import { useAppModal } from '@/hooks/useAppModal';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { usePlayerNameHistory } from '@/hooks/usePlayerNameHistory';
 import { useTournamentState } from '@/hooks/useTournamentState';
 import type { PlayerCounterField } from '@/lib/game';
-import type { AppModal } from '@/lib/modal';
 
 export default function PokerPointsPWA() {
   const tournament = useTournamentState();
   const playerNameHistory = usePlayerNameHistory();
+  const appModal = useAppModal();
   const [playerName, setPlayerName] = useState('');
-  const [modal, setModal] = useState<AppModal | null>(null);
+  const { modal } = appModal;
 
   useBodyScrollLock(Boolean(modal));
   const modalPlayer =
     modal && 'playerId' in modal ? tournament.state.players.find((player) => player.id === modal.playerId) || null : null;
 
   function closeModal() {
-    setModal(null);
+    appModal.closeModal();
   }
 
   function openAddPlayerDialog() {
     setPlayerName('');
-    setModal({ type: 'add-player' });
+    appModal.openAddPlayer();
   }
 
   function addPlayerByName(name: string) {
@@ -35,7 +36,7 @@ export default function PokerPointsPWA() {
 
     playerNameHistory.rememberName(normalizedName);
     setPlayerName('');
-    setModal({ type: 'add-player' });
+    appModal.openAddPlayer();
   }
 
   function increment(playerId: string, field: PlayerCounterField) {
@@ -45,7 +46,7 @@ export default function PokerPointsPWA() {
   function requestDecrement(playerId: string, field: PlayerCounterField) {
     const player = tournament.state.players.find((candidate) => candidate.id === playerId);
     if (!player || player[field] <= 0) return;
-    setModal({ type: 'decrement-player-field', playerId, field, playerName: player.name });
+    appModal.openDecrementPlayerField(playerId, field, player.name);
   }
 
   function confirmDecrement() {
@@ -59,7 +60,7 @@ export default function PokerPointsPWA() {
     if (!player) return;
 
     if (player.isEliminated) {
-      setModal({ type: 'return-player', playerId });
+      appModal.openReturnPlayer(playerId);
       return;
     }
 
@@ -87,11 +88,11 @@ export default function PokerPointsPWA() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-gradient-to-b from-zinc-950 via-black to-black px-4 pb-24">
-        <AppHeader onReference={() => setModal({ type: 'reference' })} onReset={() => setModal({ type: 'reset-tournament' })} />
+        <AppHeader onReference={appModal.openReference} onReset={appModal.openResetTournament} />
 
         <TournamentControls
           settings={tournament.state.settings}
-          onSettings={() => setModal({ type: 'settings' })}
+          onSettings={appModal.openSettings}
           onAddPlayer={openAddPlayerDialog}
         />
 
@@ -99,14 +100,16 @@ export default function PokerPointsPWA() {
           players={tournament.state.players}
           buyInPoints={tournament.state.settings.buyInPoints}
           eliminatedPlaces={tournament.eliminatedPlaces}
-          onIncrement={increment}
-          onRequestDecrement={requestDecrement}
+          onIncrementBuyIns={(playerId) => increment(playerId, 'buyIns')}
+          onDecrementBuyIns={(playerId) => requestDecrement(playerId, 'buyIns')}
+          onIncrementPaidEntries={(playerId) => increment(playerId, 'paidEntries')}
+          onDecrementPaidEntries={(playerId) => requestDecrement(playerId, 'paidEntries')}
           onToggleEliminated={toggleEliminated}
-          onDelete={(playerId) => setModal({ type: 'delete-player', playerId })}
+          onDelete={appModal.openDeletePlayer}
         />
       </div>
 
-      <FooterTotals totals={tournament.totals} onOpen={() => setModal({ type: 'totals' })} />
+      <FooterTotals totals={tournament.totals} onOpen={appModal.openTotals} />
 
       <AppModals
         modal={modal}

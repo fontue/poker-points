@@ -1,4 +1,5 @@
 import type { Player, PlayerCounterField, TournamentState } from './types';
+import { canIncrementPlayerField, hasDuplicatePlayerName, normalizePlayerCounters, updatePlayer } from './invariants';
 
 export function normalizeName(name: string) {
   return name.trim().replace(/\s+/g, ' ');
@@ -17,7 +18,7 @@ export function createPlayer(name: string): Player {
     id: createId(),
     name: name.trim(),
     buyIns: 1,
-    paidToken: 0,
+    paidEntries: 0,
     isEliminated: false,
     eliminatedAt: null
   };
@@ -27,8 +28,7 @@ export function addPlayerToState(state: TournamentState, name: string): Tourname
   const normalizedName = normalizeName(name);
   if (!normalizedName) return state;
 
-  const isDuplicate = state.players.some((player) => player.name.toLowerCase() === normalizedName.toLowerCase());
-  if (isDuplicate) return state;
+  if (hasDuplicatePlayerName(state.players, normalizedName)) return state;
 
   return {
     ...state,
@@ -45,9 +45,9 @@ export function incrementPlayerField(
     ...state,
     players: state.players.map((player) => {
       if (player.id !== playerId) return player;
-      if (field === 'paidToken' && player.paidToken >= player.buyIns) return player;
+      if (!canIncrementPlayerField(player, field)) return player;
 
-      return { ...player, [field]: player[field] + 1 };
+      return normalizePlayerCounters({ ...player, [field]: player[field] + 1 });
     })
   };
 }
@@ -57,12 +57,7 @@ export function decrementPlayerField(
   playerId: string,
   field: PlayerCounterField
 ): TournamentState {
-  return {
-    ...state,
-    players: state.players.map((player) =>
-      player.id === playerId ? { ...player, [field]: Math.max(0, player[field] - 1) } : player
-    )
-  };
+  return updatePlayer(state, playerId, (player) => ({ ...player, [field]: Math.max(0, player[field] - 1) }));
 }
 
 export function deletePlayerFromState(state: TournamentState, playerId: string): TournamentState {

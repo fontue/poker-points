@@ -1,30 +1,30 @@
-export type PlayerCounterField = 'buyIns' | 'paidToken';
+export type PlayerCounterField = 'buyIns' | 'paidEntries';
 
-export type Settings = {
+export interface Settings {
   buyInPoints: number;
   buyInChips: number;
   commission: number;
-};
+}
 
-export type Player = {
+export interface Player {
   id: string;
   name: string;
   buyIns: number;
-  paidToken: number;
+  paidEntries: number;
   isEliminated: boolean;
   eliminatedAt: number | null;
-};
+}
 
-export type TournamentState = {
+export interface TournamentState {
   settings: Settings;
   players: Player[];
-};
+}
 
-export type Totals = {
+export interface Totals {
   pointsInGame: number;
   pointsPaidByTokens: number;
   prizePoints: number;
   chipsInGame: number;
   activePlayersCount: number;
   averageStack: number;
-};
+}

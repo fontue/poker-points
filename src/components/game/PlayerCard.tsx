@@ -2,17 +2,19 @@ import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatNumber } from '@/lib/format';
 import { getPlayerCardClass } from '@/lib/ui';
 import { CounterRow } from './CounterRow';
-import type { Player, PlayerCounterField } from '@/lib/game';
+import { PlayerPaymentBadge } from './PlayerPaymentBadge';
+import type { Player } from '@/lib/game';
 
 type PlayerCardProps = {
   player: Player;
   buyInPoints: number;
   place?: number;
-  onIncrement: (playerId: string, field: PlayerCounterField) => void;
-  onRequestDecrement: (playerId: string, field: PlayerCounterField) => void;
+  onIncrementBuyIns: (playerId: string) => void;
+  onDecrementBuyIns: (playerId: string) => void;
+  onIncrementPaidEntries: (playerId: string) => void;
+  onDecrementPaidEntries: (playerId: string) => void;
   onToggleEliminated: (playerId: string) => void;
   onDelete: (playerId: string) => void;
 };
@@ -21,14 +23,13 @@ export function PlayerCard({
   player,
   buyInPoints,
   place,
-  onIncrement,
-  onRequestDecrement,
+  onIncrementBuyIns,
+  onDecrementBuyIns,
+  onIncrementPaidEntries,
+  onDecrementPaidEntries,
   onToggleEliminated,
   onDelete
 }: PlayerCardProps) {
-  const unpaid = Math.max(0, player.buyIns - player.paidToken);
-  const unpaidPoints = unpaid * buyInPoints;
-  const isPaid = unpaid === 0 && player.buyIns > 0;
   const isEliminated = Boolean(player.isEliminated);
 
   return (
@@ -43,19 +44,7 @@ export function PlayerCard({
             <h2 className="-ml-1 min-w-0 truncate text-xl font-black tracking-tight">{player.name}</h2>
 
             <div className="flex items-center gap-2">
-              <div
-                className={`flex items-center gap-2 rounded-2xl px-3 ring-1 ${
-                  isPaid ? 'bg-[#17302a] ring-emerald-500/25' : 'bg-[#39201f] ring-red-500/25'
-                }`}
-              >
-                <div className={`text-[11px] font-bold uppercase tracking-wide ${isPaid ? 'text-emerald-200/80' : 'text-red-200/80'}`}>
-                  {isPaid ? 'Оплачено' : 'Не оплачено'}
-                </div>
-
-                <div className={`text-xl font-black ${isPaid ? 'text-emerald-300' : 'text-red-300'}`}>
-                  {isPaid ? '✓' : `${formatNumber(unpaidPoints)}P`}
-                </div>
-              </div>
+              <PlayerPaymentBadge player={player} buyInPoints={buyInPoints} />
 
               <button onClick={() => onDelete(player.id)} className="rounded-2xl bg-white/10 p-2 text-zinc-400 active:scale-95">
                 <Trash2 size={18} />
@@ -67,15 +56,15 @@ export function PlayerCard({
             <CounterRow
               value={player.buyIns}
               colorClass="bg-violet-600"
-              onInc={() => onIncrement(player.id, 'buyIns')}
-              onDec={() => onRequestDecrement(player.id, 'buyIns')}
+              onInc={() => onIncrementBuyIns(player.id)}
+              onDec={() => onDecrementBuyIns(player.id)}
             />
 
             <CounterRow
-              value={player.paidToken}
-              colorClass={player.paidToken >= player.buyIns ? 'bg-zinc-700' : 'bg-orange-500'}
-              onInc={() => onIncrement(player.id, 'paidToken')}
-              onDec={() => onRequestDecrement(player.id, 'paidToken')}
+              value={player.paidEntries}
+              colorClass={player.paidEntries >= player.buyIns ? 'bg-zinc-700' : 'bg-orange-500'}
+              onInc={() => onIncrementPaidEntries(player.id)}
+              onDec={() => onDecrementPaidEntries(player.id)}
             />
 
             <Button

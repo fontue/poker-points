@@ -1,13 +1,15 @@
 import { AnimatePresence } from 'framer-motion';
 import { PlayerCard } from './PlayerCard';
-import type { Player, PlayerCounterField } from '@/lib/game';
+import type { Player } from '@/lib/game';
 
 type PlayersListProps = {
   players: Player[];
   buyInPoints: number;
   eliminatedPlaces: Map<string, number>;
-  onIncrement: (playerId: string, field: PlayerCounterField) => void;
-  onRequestDecrement: (playerId: string, field: PlayerCounterField) => void;
+  onIncrementBuyIns: (playerId: string) => void;
+  onDecrementBuyIns: (playerId: string) => void;
+  onIncrementPaidEntries: (playerId: string) => void;
+  onDecrementPaidEntries: (playerId: string) => void;
   onToggleEliminated: (playerId: string) => void;
   onDelete: (playerId: string) => void;
 };
@@ -16,8 +18,10 @@ export function PlayersList({
   players,
   buyInPoints,
   eliminatedPlaces,
-  onIncrement,
-  onRequestDecrement,
+  onIncrementBuyIns,
+  onDecrementBuyIns,
+  onIncrementPaidEntries,
+  onDecrementPaidEntries,
   onToggleEliminated,
   onDelete
 }: PlayersListProps) {
@@ -30,8 +34,10 @@ export function PlayersList({
             player={player}
             buyInPoints={buyInPoints}
             place={eliminatedPlaces.get(player.id)}
-            onIncrement={onIncrement}
-            onRequestDecrement={onRequestDecrement}
+            onIncrementBuyIns={onIncrementBuyIns}
+            onDecrementBuyIns={onDecrementBuyIns}
+            onIncrementPaidEntries={onIncrementPaidEntries}
+            onDecrementPaidEntries={onDecrementPaidEntries}
             onToggleEliminated={onToggleEliminated}
             onDelete={onDelete}
           />
