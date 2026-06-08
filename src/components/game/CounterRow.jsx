@@ -12,7 +12,7 @@ export function CounterRow({ value, colorClass, onInc, onDec }) {
         <Button
           onClick={onDec}
           disabled={value <= 0}
-          className="h-8 w-9 rounded-xl bg-zinc-800 p-0 text-white hover:bg-zinc-700 disabled:opacity-35"
+          className="h-8 w-9 rounded-xl bg-zinc-800 p-0 text-white disabled:opacity-35"
         >
           <Minus size={16} />
         </Button>

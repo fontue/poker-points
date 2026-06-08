@@ -68,7 +68,7 @@ export function SettingsDialog({ settings, onChange, onClose }) {
       </div>
 
       <div className="mt-4 grid">
-        <Button onClick={saveAndClose} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
+        <Button onClick={saveAndClose} className="h-12 rounded-2xl bg-violet-600 font-bold text-white">
           Готово
         </Button>
       </div>

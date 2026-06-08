@@ -47,21 +47,21 @@ export function PlayerCard({ player, buyInPoints, place, onIncrement, onRequestD
           <div className="grid grid-cols-3 gap-2">
             <CounterRow
               value={player.buyIns}
-              colorClass="bg-violet-600 hover:bg-violet-500"
+              colorClass="bg-violet-600"
               onInc={() => onIncrement(player.id, 'buyIns')}
               onDec={() => onRequestDecrement(player.id, 'buyIns')}
             />
 
             <CounterRow
               value={player.paidToken}
-              colorClass={player.paidToken >= player.buyIns ? 'bg-zinc-700' : 'bg-orange-500 hover:bg-orange-400'}
+              colorClass={player.paidToken >= player.buyIns ? 'bg-zinc-700' : 'bg-orange-500'}
               onInc={() => onIncrement(player.id, 'paidToken')}
               onDec={() => onRequestDecrement(player.id, 'paidToken')}
             />
 
             <Button
               onClick={() => onToggleEliminated(player.id)}
-              className={`h-full min-h-12 rounded-2xl bg-zinc-800 px-2 text-xs font-black hover:bg-zinc-700 ${
+              className={`h-full min-h-12 rounded-2xl bg-zinc-800 px-2 text-xs font-black ${
                 isEliminated ? 'text-red-300' : 'text-zinc-200'
               }`}
             >

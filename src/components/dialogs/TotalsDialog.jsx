@@ -31,7 +31,7 @@ export function TotalsDialog({ totals, onClose }) {
       </div>
 
       <div className="mt-4 grid">
-        <Button onClick={onClose} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+        <Button onClick={onClose} className="h-12 rounded-2xl bg-zinc-800 text-white">
           Готово
         </Button>
       </div>

@@ -39,10 +39,10 @@ export function AddPlayerDialog({
       />
 
       <div className="grid grid-cols-2 gap-3">
-        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white">
           Отмена
         </Button>
-        <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 font-bold text-white hover:bg-violet-500">
+        <Button onClick={onConfirm} className="h-12 rounded-2xl bg-violet-600 font-bold text-white">
           Добавить
         </Button>
       </div>

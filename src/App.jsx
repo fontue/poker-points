@@ -159,11 +159,11 @@ export default function PokerPointsPWA() {
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-violet-300">Poker points</p>
             </div>
             <div className="flex items-center gap-2">
-              <Button onClick={() => setModal({ type: 'reference' })} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300 hover:bg-zinc-800">
+              <Button onClick={() => setModal({ type: 'reference' })} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300">
                 <BookOpen size={18} />
               </Button>
 
-              <Button onClick={() => setModal({ type: 'reset-tournament' })} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300 hover:bg-zinc-800">
+              <Button onClick={() => setModal({ type: 'reset-tournament' })} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300">
                 Сброс
               </Button>
             </div>
@@ -190,7 +190,7 @@ export default function PokerPointsPWA() {
               </div>
             </button>
 
-            <Button onClick={openAddPlayerDialog} className="h-full w-16 rounded-3xl bg-zinc-900 text-zinc-100 hover:bg-zinc-800">
+            <Button onClick={openAddPlayerDialog} className="h-full w-16 rounded-3xl bg-zinc-900 text-zinc-100">
               <UserPlus size={18} className="size-6" />
             </Button>
           </div>

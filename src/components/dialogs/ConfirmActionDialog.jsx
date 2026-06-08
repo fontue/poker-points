@@ -2,8 +2,8 @@ import { Button } from '@/components/ui/button';
 import { AppDialog } from './AppDialog';
 
 const confirmButtonClasses = {
-  destructive: 'bg-red-600 text-white hover:bg-red-500',
-  primary: 'bg-violet-600 text-white hover:bg-violet-500'
+  destructive: 'bg-red-600 text-white',
+  primary: 'bg-violet-600 text-white'
 };
 
 export function ConfirmActionDialog({
@@ -22,7 +22,7 @@ export function ConfirmActionDialog({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700">
+        <Button onClick={onCancel} className="h-12 rounded-2xl bg-zinc-800 text-white">
           Отмена
         </Button>
         <Button onClick={onConfirm} className={`h-12 rounded-2xl ${confirmButtonClasses[confirmTone]}`}>
