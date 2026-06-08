@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Settings2, X, Trash2, UserPlus } from 'lucide-react';
+import { Minus, Settings2, X, Trash2, UserPlus, BookOpen, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import './App.css';
@@ -10,9 +10,8 @@ const PLAYER_NAMES_STORAGE_KEY = 'poker-points-player-names-v1';
 
 const defaultState = {
   settings: {
-    buyInPoints: 1000,
-    buyInChips: 5000,
-    isCollapsed: false
+    buyInPoints: 2000,
+    buyInChips: 50000
   },
   players: []
 };
@@ -69,8 +68,7 @@ function makePlayer(name) {
     id: createId(),
     name: name.trim(),
     buyIns: 1,
-    paidToken: 0,
-    paidOnlineToken: 0
+    paidToken: 0
   };
 }
 
@@ -295,6 +293,86 @@ function SettingsDialog({ buyInPoints, buyInChips, onChange, onClose }) {
     </AppDialog>
   );
 }
+function ReferenceDialog({ onClose }) {
+  const [activeSection, setActiveSection] = useState(null);
+
+  const sections = [
+    {
+      id: 'general-rules',
+      title: 'Общие правила',
+      content: 'Тестовый контент раздела «Общие правила».'
+    },
+    {
+      id: 'table-actions',
+      title: 'Правила действий за столом',
+      content: 'Тестовый контент раздела «Правила действий за столом».'
+    },
+    {
+      id: 'card-opening',
+      title: 'Правила открытия карт',
+      content: 'Тестовый контент раздела «Правила открытия карт».'
+    },
+    {
+      id: 'dealing-errors',
+      title: 'Решение ошибок при раздаче',
+      content: 'Тестовый контент раздела «Решение ошибок при раздаче».'
+    },
+    {
+      id: 'tournament-settings',
+      title: 'Параметры турнира',
+      content: 'Тестовый контент раздела «Параметры турнира».'
+    }
+  ];
+
+  const currentSection = sections.find((section) => section.id === activeSection);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black text-white">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="mx-auto flex h-[100dvh] w-full max-w-[430px] flex-col bg-gradient-to-b from-zinc-950 via-black to-black"
+      >
+        <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+          <button
+            onClick={currentSection ? () => setActiveSection(null) : onClose}
+            className="rounded-2xl bg-zinc-900 p-2 text-zinc-200 active:scale-95"
+          >
+            {currentSection ? <ChevronLeft size={20} /> : <X size={20} />}
+          </button>
+
+          <h2 className="min-w-0 flex-1 truncate text-center text-base font-black">
+            {currentSection ? currentSection.title : 'Справочник'}
+          </h2>
+
+          <div className="w-9" />
+        </header>
+
+        <main className="flex-1 overflow-y-auto px-4 py-4 overscroll-contain">
+          {!currentSection ? (
+            <div className="space-y-3">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className="flex w-full items-center justify-between rounded-3xl bg-zinc-900 p-4 text-left ring-1 ring-white/10 active:scale-[0.99]"
+                >
+                  <span className="text-base font-bold">{section.title}</span>
+                  <ChevronLeft size={18} className="rotate-180 text-zinc-500" />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl bg-zinc-900 p-4 ring-1 ring-white/10">
+              <p className="text-sm leading-6 text-zinc-300">{currentSection.content}</p>
+            </div>
+          )}
+        </main>
+      </motion.div>
+    </div>
+  );
+}
 
 function CounterRow({ value, colorClass, onInc, onDec }) {
   return (
@@ -317,7 +395,7 @@ function CounterRow({ value, colorClass, onInc, onDec }) {
 }
 
 function PlayerCard({ player, buyInPoints, onIncrement, onRequestDecrement, onDelete }) {
-  const unpaid = Math.max(0, player.buyIns - player.paidToken - player.paidOnlineToken);
+  const unpaid = Math.max(0, player.buyIns - player.paidToken);
   const unpaidPoints = unpaid * buyInPoints;
   const isPaid = unpaid === 0 && player.buyIns > 0;
 
@@ -361,17 +439,9 @@ function PlayerCard({ player, buyInPoints, onIncrement, onRequestDecrement, onDe
             <CounterRow
               label="Жетон"
               value={player.paidToken}
-              colorClass="bg-orange-500 hover:bg-orange-400"
+              colorClass={player.paidToken >= player.buyIns ? 'bg-zinc-700' : 'bg-orange-500 hover:bg-orange-400'}
               onInc={() => onIncrement(player.id, 'paidToken')}
               onDec={() => onRequestDecrement(player.id, 'paidToken')}
-            />
-
-            <CounterRow
-              label="Онлайн"
-              value={player.paidOnlineToken}
-              colorClass="bg-emerald-600 hover:bg-emerald-500"
-              onInc={() => onIncrement(player.id, 'paidOnlineToken')}
-              onDec={() => onRequestDecrement(player.id, 'paidOnlineToken')}
             />
           </div>
         </CardContent>
@@ -388,6 +458,7 @@ export default function PokerPointsPWA() {
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [isReferenceOpen, setIsReferenceOpen] = useState(false);
   const [playerNamesHistory, setPlayerNamesHistory] = useState(loadPlayerNamesHistory);
 
   useEffect(() => {
@@ -399,7 +470,9 @@ export default function PokerPointsPWA() {
   }, [playerNamesHistory]);
 
   useEffect(() => {
-    const isModalOpen = Boolean(confirmAction || deletePlayerId || isAddPlayerOpen || isSettingsOpen || isResetDialogOpen);
+    const isModalOpen = Boolean(
+      confirmAction || deletePlayerId || isAddPlayerOpen || isSettingsOpen || isResetDialogOpen || isReferenceOpen
+    );
     if (!isModalOpen) return;
 
     const previousBodyOverflow = document.body.style.overflow;
@@ -412,11 +485,11 @@ export default function PokerPointsPWA() {
       document.body.style.overflow = previousBodyOverflow;
       document.documentElement.style.overflow = previousHtmlOverflow;
     };
-  }, [confirmAction, deletePlayerId, isAddPlayerOpen, isSettingsOpen, isResetDialogOpen]);
+  }, [confirmAction, deletePlayerId, isAddPlayerOpen, isSettingsOpen, isResetDialogOpen, isReferenceOpen]);
 
   const totals = useMemo(() => {
     const totalBuyIns = state.players.reduce((sum, p) => sum + p.buyIns, 0);
-    const paidTokens = state.players.reduce((sum, p) => sum + p.paidToken + p.paidOnlineToken, 0);
+    const paidTokens = state.players.reduce((sum, p) => sum + p.paidToken, 0);
 
     return {
       pointsInGame: totalBuyIns * state.settings.buyInPoints,
@@ -448,6 +521,14 @@ export default function PokerPointsPWA() {
 
   function closeSettingsDialog() {
     setIsSettingsOpen(false);
+  }
+
+  function openReferenceDialog() {
+    setIsReferenceOpen(true);
+  }
+
+  function closeReferenceDialog() {
+    setIsReferenceOpen(false);
   }
 
   function openAddPlayerDialog() {
@@ -494,7 +575,15 @@ export default function PokerPointsPWA() {
   function increment(playerId, field) {
     setState((prev) => ({
       ...prev,
-      players: prev.players.map((p) => (p.id === playerId ? { ...p, [field]: p[field] + 1 } : p))
+      players: prev.players.map((p) => {
+        if (p.id !== playerId) return p;
+
+        if (field === 'paidToken' && p.paidToken >= p.buyIns) {
+          return p;
+        }
+
+        return { ...p, [field]: p[field] + 1 };
+      })
     }));
   }
 
@@ -542,6 +631,7 @@ export default function PokerPointsPWA() {
     setIsAddPlayerOpen(false);
     setIsSettingsOpen(false);
     setIsResetDialogOpen(false);
+    setIsReferenceOpen(false);
   }
 
   return (
@@ -552,9 +642,15 @@ export default function PokerPointsPWA() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-violet-300">Poker points</p>
             </div>
-            <Button onClick={openResetDialog} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300 hover:bg-zinc-800">
-              Сброс
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={openReferenceDialog} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300 hover:bg-zinc-800">
+                <BookOpen size={18} />
+              </Button>
+
+              <Button onClick={openResetDialog} className="rounded-2xl bg-zinc-900 px-3 text-zinc-300 hover:bg-zinc-800">
+                Сброс
+              </Button>
+            </div>
           </div>
         </header>
 
@@ -577,7 +673,7 @@ export default function PokerPointsPWA() {
               </div>
             </button>
 
-            <Button onClick={openAddPlayerDialog} className="h-full rounded-3xl bg-zinc-900 text-zinc-100 w-16 hover:bg-zinc-800 ">
+            <Button onClick={openAddPlayerDialog} className="h-full w-16 rounded-3xl bg-zinc-900 text-zinc-100 hover:bg-zinc-800">
               <UserPlus size={18} className="size-6" />
             </Button>
           </div>
@@ -661,6 +757,8 @@ export default function PokerPointsPWA() {
       <AnimatePresence>
         {isResetDialogOpen && <ResetTournamentDialog onCancel={closeResetDialog} onConfirm={resetTournament} />}
       </AnimatePresence>
+
+      <AnimatePresence>{isReferenceOpen && <ReferenceDialog onClose={closeReferenceDialog} />}</AnimatePresence>
     </div>
   );
 }
