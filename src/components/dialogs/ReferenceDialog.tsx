@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, X } from 'lucide-react';
+import { MarkdownContent } from '@/components/common/MarkdownContent';
 import { referenceSections } from '@/content/referenceSections';
 
 type ReferenceDialogProps = {
@@ -50,7 +51,7 @@ export function ReferenceDialog({ onClose }: ReferenceDialogProps) {
             </div>
           ) : (
             <div className="rounded-3xl bg-zinc-900 p-4 ring-1 ring-white/10">
-              <p className="text-sm leading-6 text-zinc-300">{currentSection.content}</p>
+              <MarkdownContent content={currentSection.content} />
             </div>
           )}
         </main>
