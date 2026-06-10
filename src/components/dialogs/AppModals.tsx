@@ -7,7 +7,7 @@ import { SettingsDialog } from './SettingsDialog';
 import { TimerAlertSettingsDialog } from './TimerAlertSettingsDialog';
 import { TimerSettingsDialog } from './TimerSettingsDialog';
 import { TotalsDialog } from './TotalsDialog';
-import type { Player, PrizePayout, Settings, Totals } from '@/lib/game';
+import type { Player, PrizePayout, Settings, Totals, TournamentTimer } from '@/lib/game';
 import type { AppModal } from '@/lib/modal';
 import type { ConfirmActionDialogProps } from './ConfirmActionDialog';
 
@@ -15,6 +15,7 @@ type AppModalsProps = {
   modal: AppModal | null;
   modalPlayer: Player | null;
   settings: Settings;
+  timer: TournamentTimer;
   totals: Totals;
   prizePayouts: PrizePayout[];
   playerName: string;
@@ -108,6 +109,7 @@ export function AppModals({
   modal,
   modalPlayer,
   settings,
+  timer,
   totals,
   prizePayouts,
   playerName,
@@ -174,7 +176,7 @@ export function AppModals({
     }
 
     if (modal?.type === 'totals') {
-      return <TotalsDialog key="totals" totals={totals} prizePayouts={prizePayouts} onClose={onClose} />;
+      return <TotalsDialog key="totals" settings={settings} timer={timer} totals={totals} prizePayouts={prizePayouts} onClose={onClose} />;
     }
 
     return null;

@@ -134,6 +134,7 @@ export default function PokerPointsPWA() {
         modal={modal}
         modalPlayer={modalPlayer}
         settings={tournament.state.settings}
+        timer={tournament.state.timer}
         totals={tournament.totals}
         prizePayouts={tournament.prizePayouts}
         playerName={playerName}
