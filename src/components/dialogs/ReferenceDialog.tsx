@@ -38,19 +38,24 @@ export function ReferenceDialog({ onClose }: ReferenceDialogProps) {
         <main className="flex-1 overflow-y-auto px-4 py-4 overscroll-contain">
           {!currentSection ? (
             <div className="space-y-3">
-              {referenceSections.map((section) => (
+              {referenceSections.map((section, index) => (
                 <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
-                  className="flex w-full items-center justify-between rounded-3xl bg-zinc-900 p-4 text-left ring-1 ring-white/10 active:scale-[0.99]"
+                  className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-3 rounded-3xl bg-zinc-900/85 p-4 text-left ring-1 ring-white/10 active:scale-[0.99]"
                 >
-                  <span className="text-base font-bold">{section.title}</span>
+                  <span className="grid h-9 w-9 place-items-center rounded-2xl bg-violet-600/15 text-sm font-black text-violet-200 ring-1 ring-violet-400/15">
+                    {index + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-base font-black text-zinc-100">{section.title}</span>
+                  </span>
                   <ChevronLeft size={18} className="rotate-180 text-zinc-500" />
                 </button>
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl bg-zinc-900 p-4 ring-1 ring-white/10">
+            <div className="rounded-3xl bg-zinc-900/75 p-3 ring-1 ring-white/10">
               <MarkdownContent content={currentSection.content} />
             </div>
           )}

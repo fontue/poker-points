@@ -57,7 +57,7 @@ function renderBlock(block: MarkdownBlock, index: number): ReactNode {
   if (block.type === 'heading') {
     const className =
       block.level === 2
-        ? 'mt-5 first:mt-0 text-base font-black text-white'
+        ? 'mt-6 first:mt-0 text-base font-black text-zinc-100'
         : 'mt-4 first:mt-0 text-sm font-black text-zinc-100';
 
     return (
@@ -69,10 +69,11 @@ function renderBlock(block: MarkdownBlock, index: number): ReactNode {
 
   if (block.type === 'list') {
     return (
-      <ul key={index} className="my-3 space-y-2 pl-4 text-sm leading-6 text-zinc-300">
+      <ul key={index} className="my-3 space-y-2 text-sm leading-6 text-zinc-300">
         {block.items.map((item) => (
-          <li key={item} className="list-disc pl-1">
-            {item}
+          <li key={item} className="grid grid-cols-[auto_1fr] gap-2 rounded-xl bg-black/25 px-3 py-2 ring-1 ring-white/[0.06]">
+            <span className="mt-2 h-1.5 w-1.5 rounded-full bg-violet-300/80" />
+            <span>{item}</span>
           </li>
         ))}
       </ul>
@@ -80,7 +81,7 @@ function renderBlock(block: MarkdownBlock, index: number): ReactNode {
   }
 
   return (
-    <p key={index} className="my-3 text-sm leading-6 text-zinc-300">
+    <p key={index} className="my-3 rounded-xl bg-black/20 px-3 py-2 text-sm leading-6 text-zinc-300 ring-1 ring-white/[0.04]">
       {block.text}
     </p>
   );

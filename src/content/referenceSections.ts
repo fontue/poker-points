@@ -83,10 +83,5 @@ export const referenceSections: ReferenceSection[] = [
 
 ### Любая спорная ситуация
 * решение организатора окончательное.`
-  },
-  {
-    id: 'tournament-settings',
-    title: 'Параметры турнира',
-    content: 'Тестовый контент раздела «Параметры турнира».'
   }
 ];

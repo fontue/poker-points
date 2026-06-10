@@ -37,8 +37,8 @@ export function PokerTimer({
   const isFirstLevel = timer.currentLevelIndex === 0;
   const isLastLevel = timer.currentLevelIndex >= settings.timerLevels.length - 1;
   const [visibleActionsSide, setVisibleActionsSide] = useState<'left' | 'right' | null>(null);
-  const leftActionsWidth = 96;
-  const rightActionsWidth = 56;
+  const leftActionsWidth = 140;
+  const rightActionsWidth = 70;
 
   function getTimerOffset() {
     if (visibleActionsSide === 'left') return leftActionsWidth;
@@ -60,7 +60,7 @@ export function PokerTimer({
 
   return (
     <section className="relative mb-4 overflow-hidden rounded-3xl">
-      <div className="absolute left-0 top-0.5 bottom-0.5 grid w-[88px] grid-cols-2 overflow-hidden rounded-3xl">
+      <div className="absolute left-0 top-0.5 bottom-0.5 grid w-[132px] grid-cols-2 overflow-hidden rounded-3xl">
         <button
           type="button"
           onClick={() => {
@@ -91,7 +91,7 @@ export function PokerTimer({
           closeActions();
           onResetLevel();
         }}
-        className="absolute right-0 top-0.5 bottom-0.5 grid w-12 place-items-center rounded-3xl bg-red-500/85 text-white active:brightness-110"
+        className="absolute right-0 top-0.5 bottom-0.5 grid w-[62px] place-items-center rounded-3xl bg-red-500/85 text-white active:brightness-110"
         aria-label="Сбросить таймер"
       >
         <RotateCcw size={20} />

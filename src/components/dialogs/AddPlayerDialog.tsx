@@ -70,7 +70,7 @@ export function AddPlayerDialog({
       {history.length > 0 && (
         <div className="mt-4">
           <div className="mb-2 text-sm font-bold text-zinc-400">История имён</div>
-          <div className="max-h-[38dvh] space-y-1.5 overflow-y-auto pr-1 overscroll-contain">
+          <div className="grid max-h-[38dvh] grid-cols-2 gap-2 overflow-y-auto pr-1 overscroll-contain">
             {[...history]
               .sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }))
               .map((name) => {
@@ -79,21 +79,26 @@ export function AddPlayerDialog({
                 return (
                   <div
                     key={name}
-                    className="flex items-center gap-1.5 rounded-xl border border-white/[0.14] bg-zinc-900/70 p-1.5 ring-1 ring-black/40"
+                    className={`flex min-w-0 items-center gap-1 rounded-xl border p-1.5 ring-1 ring-black/40 ${
+                      isAlreadyAdded
+                        ? 'border-violet-300/15 bg-violet-500/[0.08]'
+                        : 'border-white/[0.14] bg-zinc-900/70'
+                    }`}
                   >
                     <button
                       type="button"
                       onClick={() => onSelectHistoryName(name)}
                       disabled={isAlreadyAdded}
-                      className="min-w-0 flex-1 truncate rounded-lg px-2.5 py-1.5 text-left text-sm font-bold text-white disabled:text-zinc-600"
+                      className={`min-w-0 flex-1 truncate rounded-lg px-2 py-1.5 text-left text-sm font-bold ${
+                        isAlreadyAdded ? 'text-violet-100/65' : 'text-white'
+                      }`}
                     >
                       {name}
-                      {isAlreadyAdded && <span className="ml-2 text-xs font-black uppercase text-zinc-500">В игре</span>}
                     </button>
                     <button
                       type="button"
                       onClick={() => onDeleteHistoryName(name)}
-                      className="rounded-lg bg-zinc-800 p-1.5 text-zinc-400 active:scale-95"
+                      className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-zinc-800/80 text-zinc-400 active:scale-95"
                       aria-label={`Удалить ${name} из истории`}
                     >
                       <X size={16} />
