@@ -15,12 +15,10 @@ export function PrizeDistributionInfoDialog({ settings, onClose }: PrizeDistribu
   const rows = Array.from({ length: 20 }, (_, index) => {
     const prizePoolPoints = step * (index + 1);
     const payouts = calculatePrizePayouts(prizePoolPoints, settings, [], new Map());
-    const paidOut = payouts.reduce((sum, payout) => sum + payout.amount, 0);
 
     return {
       prizePoolPoints,
-      payouts,
-      remainingPrizePoolPoints: Math.max(0, prizePoolPoints - paidOut)
+      payouts
     };
   });
 
@@ -35,7 +33,7 @@ export function PrizeDistributionInfoDialog({ settings, onClose }: PrizeDistribu
         <div className="min-w-max">
           <div
             className="grid gap-2 border-b border-white/10 px-3 py-2 text-[11px] font-black uppercase text-zinc-500"
-            style={{ gridTemplateColumns: `5.5rem repeat(${prizePlaces}, 5rem) 5.5rem` }}
+            style={{ gridTemplateColumns: `5.5rem repeat(${prizePlaces}, 5rem)` }}
           >
             <div>Фонд</div>
             {Array.from({ length: prizePlaces }, (_, index) => (
@@ -43,7 +41,6 @@ export function PrizeDistributionInfoDialog({ settings, onClose }: PrizeDistribu
                 {index + 1} место
               </div>
             ))}
-            <div className="text-right">Остаток</div>
           </div>
 
           <div className="max-h-[55dvh] overflow-y-auto overscroll-contain">
@@ -51,7 +48,7 @@ export function PrizeDistributionInfoDialog({ settings, onClose }: PrizeDistribu
               <div
                 key={row.prizePoolPoints}
                 className="grid gap-2 border-b border-white/5 px-3 py-3 text-sm last:border-b-0"
-                style={{ gridTemplateColumns: `5.5rem repeat(${prizePlaces}, 5rem) 5.5rem` }}
+                style={{ gridTemplateColumns: `5.5rem repeat(${prizePlaces}, 5rem)` }}
               >
                 <div className="font-black text-zinc-100">{formatNumber(row.prizePoolPoints)}P</div>
                 {row.payouts.map((payout) => (
@@ -60,7 +57,6 @@ export function PrizeDistributionInfoDialog({ settings, onClose }: PrizeDistribu
                     <div className="text-[11px] font-bold text-yellow-200/70">{payout.effectivePercent.toFixed(1)}%</div>
                   </div>
                 ))}
-                <div className="text-right font-bold text-zinc-400">{formatNumber(row.remainingPrizePoolPoints)}P</div>
               </div>
             ))}
           </div>
@@ -69,7 +65,7 @@ export function PrizeDistributionInfoDialog({ settings, onClose }: PrizeDistribu
 
       <div className="mt-4 grid">
         <Button onClick={onClose} className="h-12 rounded-2xl bg-zinc-800 text-white">
-          Готово
+          Закрыть
         </Button>
       </div>
     </AppDialog>

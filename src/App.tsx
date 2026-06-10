@@ -100,7 +100,6 @@ export default function PokerPointsPWA() {
         <TournamentControls
           settings={tournament.state.settings}
           onSettings={appModal.openSettings}
-          onPrizeSettings={appModal.openPrizeSettings}
           onAddPlayer={openAddPlayerDialog}
         />
 

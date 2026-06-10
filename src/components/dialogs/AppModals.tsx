@@ -3,7 +3,6 @@ import { AddPlayerDialog } from './AddPlayerDialog';
 import { ConfirmActionDialog } from './ConfirmActionDialog';
 import { PrizeSettingsDialog } from './PrizeSettingsDialog';
 import { ReferenceDialog } from './ReferenceDialog';
-import { SettingsDialog } from './SettingsDialog';
 import { TimerAlertSettingsDialog } from './TimerAlertSettingsDialog';
 import { TimerSettingsDialog } from './TimerSettingsDialog';
 import { TotalsDialog } from './TotalsDialog';
@@ -156,7 +155,7 @@ export function AppModals({
     }
 
     if (modal?.type === 'settings') {
-      return <SettingsDialog key="settings" settings={settings} onChange={onUpdateSettings} onClose={onClose} />;
+      return <PrizeSettingsDialog key="settings" settings={settings} onChange={onUpdateSettings} onClose={onClose} />;
     }
 
     if (modal?.type === 'prize-settings') {

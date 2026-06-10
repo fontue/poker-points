@@ -17,7 +17,7 @@ export type SettingField = {
 export const settingFields: SettingField[] = [
   {
     key: 'buyInPoints',
-    label: 'Стоимость бай-ина',
+    label: 'Цена бай-ина',
     minValue: 1,
     placeholder: '1'
   },

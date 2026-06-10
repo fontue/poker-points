@@ -1,20 +1,24 @@
 import { useState } from 'react';
 import { normalizeNumberInput } from '@/lib/format';
 import { normalizePrizeDistribution, normalizeSettings } from '@/lib/game';
-import { prizeDistributionPresets, prizeSettingsSection } from '@/lib/settings';
+import { buyInSettingsSection, prizeDistributionPresets, prizeSettingsSection } from '@/lib/settings';
 import type { Settings } from '@/lib/game';
 import type { ScalarSettingKey } from '@/lib/settings';
 
-export type PrizeSettingKey = Extract<ScalarSettingKey, 'prizeAdjustmentPoints' | 'prizePlaces' | 'prizeRoundingStep'>;
+export type PrizeSettingKey = Extract<
+  ScalarSettingKey,
+  'buyInPoints' | 'buyInChips' | 'prizeAdjustmentPoints' | 'prizePlaces' | 'prizeRoundingStep'
+>;
 export type PrizeSettingsValues = Record<PrizeSettingKey, string>;
+const prizeFormFields = [...buyInSettingsSection.fields, ...prizeSettingsSection.fields];
 
 function createPrizeSettingsValues(settings: Settings): PrizeSettingsValues {
-  return Object.fromEntries(prizeSettingsSection.fields.map((field) => [field.key, String(settings[field.key] || '')])) as PrizeSettingsValues;
+  return Object.fromEntries(prizeFormFields.map((field) => [field.key, String(settings[field.key] || '')])) as PrizeSettingsValues;
 }
 
 function normalizePrizeSettings(values: PrizeSettingsValues): Record<PrizeSettingKey, number> {
   return Object.fromEntries(
-    prizeSettingsSection.fields.map((field) => {
+    prizeFormFields.map((field) => {
       const rawValue = values[field.key as PrizeSettingKey] === '' ? 0 : Number(values[field.key as PrizeSettingKey]);
       const value = Number.isFinite(rawValue) ? Math.floor(rawValue) : 0;
 
@@ -47,7 +51,7 @@ export function usePrizeSettingsForm(settings: Settings) {
   });
 
   function updateValue(key: PrizeSettingKey, value: string) {
-    const field = prizeSettingsSection.fields.find((currentField) => currentField.key === key);
+    const field = prizeFormFields.find((currentField) => currentField.key === key);
     const nextValue = normalizeNumberInput(value, field?.allowNegative);
     setValues((prev) => ({ ...prev, [key]: nextValue }));
 

@@ -151,7 +151,7 @@ export function TotalsDialog({ settings, timer, totals, prizePayouts, onClose }:
         </TotalsSection>
       </div>
 
-      <div className="mt-4 grid">
+      <div className="sticky -bottom-5 -mx-5 -mb-5 mt-4 grid border-t border-white/10 bg-zinc-950 px-5 pb-5 pt-3">
         <Button onClick={onClose} className="h-12 rounded-2xl bg-zinc-800 text-white">
           Закрыть
         </Button>

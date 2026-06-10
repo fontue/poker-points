@@ -129,11 +129,11 @@ export function tournamentReducer(state: TournamentState, action: TournamentActi
         action.now
       );
     case 'tournament/reset':
-      return {
-        ...state,
-        players: [],
-        timer: { ...state.timer, isRunning: false, levelStartedAt: null, endsAt: null, lastCompletedLevelIndex: null }
-      };
+      return setTimerLevel(
+        { ...state, players: [], timer: { ...state.timer, isRunning: false, levelStartedAt: null, endsAt: null, lastCompletedLevelIndex: null } },
+        0,
+        Date.now()
+      );
     default:
       return assertNever(action);
   }

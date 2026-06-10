@@ -13,6 +13,10 @@ type PrizeDistributionEditorProps = {
   onPercentChange: (index: number, value: string) => void;
 };
 
+function formatPlacesLabel(places: string) {
+  return places === '1' ? '1 место' : `${places} места`;
+}
+
 export function PrizeDistributionEditor({
   prizePlaces,
   distribution,
@@ -25,46 +29,56 @@ export function PrizeDistributionEditor({
   onPercentChange
 }: PrizeDistributionEditorProps) {
   return (
-    <div className="mt-4 rounded-3xl bg-zinc-900 p-3 text-left ring-1 ring-white/10">
+    <div className="mt-4 rounded-3xl bg-zinc-900/80 p-3 text-left ring-1 ring-white/10">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="text-sm font-black text-zinc-100">Распределение призовых</div>
+        <div>
+          <div className="text-sm font-black text-zinc-100">Распределение</div>
+          <div className="mt-0.5 text-xs font-bold text-zinc-500">Проценты по призовым местам</div>
+        </div>
         <div className="flex items-center gap-2">
           {isValid && (
-            <button type="button" onClick={onInfo} className="rounded-xl bg-white/10 p-2 text-zinc-300 active:scale-95">
+            <button type="button" onClick={onInfo} className="grid h-9 w-9 place-items-center rounded-xl bg-black/50 text-zinc-300 active:scale-95">
               <Info size={16} />
             </button>
           )}
-          <div className={`text-xs font-black ${isValid ? 'text-emerald-300' : 'text-red-300'}`}>{percentTotal}%</div>
+          <div
+            className={`rounded-xl px-3 py-2 text-xs font-black ${
+              isValid ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/20' : 'bg-red-500/15 text-red-300 ring-1 ring-red-400/20'
+            }`}
+          >
+            {percentTotal}%
+          </div>
         </div>
       </div>
 
-      <div className="mb-3 grid grid-cols-3 gap-1.5">
+      <div className="mb-3 grid grid-cols-3 gap-2">
         {Object.entries(prizeDistributionPresets).map(([places, preset]) => (
           <button
             key={places}
             type="button"
             onClick={() => onApplyPreset(preset)}
-            className={`rounded-xl px-1.5 py-1.5 text-center text-[10px] font-black leading-none active:scale-95 ${
+            className={`rounded-xl px-2 py-2 text-center text-[11px] font-black leading-tight active:scale-95 ${
               prizePlaces === preset.length && distribution.join('/') === preset.map(String).join('/')
                 ? 'bg-violet-600 text-white'
-                : 'bg-black text-zinc-300'
+                : 'bg-black/60 text-zinc-300'
             }`}
           >
-            {places} места: {preset.join('/')}
+            <span className="block">{formatPlacesLabel(places)}</span>
+            <span className="block text-[10px] opacity-70">{preset.join('/')}</span>
           </button>
         ))}
       </div>
 
       <div className="space-y-2">
         {distribution.map((percent, index) => (
-          <label key={index} className="grid grid-cols-[auto_1fr] items-center gap-3">
-            <span className="text-sm font-bold text-zinc-300">{index + 1} место</span>
+          <label key={index} className="grid grid-cols-[1fr_96px] items-center gap-3 rounded-2xl bg-black/35 px-3 py-2 ring-1 ring-white/[0.06]">
+            <span className="text-sm font-black text-zinc-200">{index + 1} место</span>
             <input
               type="text"
               inputMode="numeric"
               value={percent}
               onChange={(event) => onPercentChange(index, event.target.value)}
-              className={`h-11 min-w-0 rounded-2xl border bg-black px-4 text-right text-base font-bold outline-none focus:border-violet-400 ${
+              className={`h-10 min-w-0 rounded-xl border bg-zinc-950 px-3 text-right text-base font-black outline-none focus:border-violet-400 ${
                 index > 0 && percentValues[index] > percentValues[index - 1] ? 'border-red-400 text-red-200' : 'border-white/10'
               }`}
             />
@@ -72,9 +86,11 @@ export function PrizeDistributionEditor({
         ))}
       </div>
 
-      {percentTotal !== 100 && <div className="mt-3 text-xs font-bold text-red-300">Сумма процентов должна быть 100%.</div>}
+      {percentTotal !== 100 && <div className="mt-3 rounded-xl bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300">Сумма процентов должна быть 100%.</div>}
       {!isOrdered && (
-        <div className="mt-3 text-xs font-bold text-red-300">Процент за следующее место не может быть больше предыдущего.</div>
+        <div className="mt-2 rounded-xl bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300">
+          Процент за следующее место не может быть больше предыдущего.
+        </div>
       )}
     </div>
   );

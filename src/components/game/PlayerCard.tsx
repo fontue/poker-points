@@ -42,11 +42,27 @@ export function PlayerCard({
   const rightActionsWidth = 140;
   const medalClass = getPrizeMedalClass(place);
 
+  function closeActions() {
+    setVisibleActionsSide(null);
+  }
+
+  function decrementBuyIns() {
+    closeActions();
+    onDecrementBuyIns(player.id);
+  }
+
+  function decrementPaidEntries() {
+    closeActions();
+    onDecrementPaidEntries(player.id);
+  }
+
   function toggleEliminated() {
+    closeActions();
     onToggleEliminated(player.id);
   }
 
   function deletePlayer() {
+    closeActions();
     onDelete(player.id);
   }
 
@@ -67,7 +83,7 @@ export function PlayerCard({
       <div className="absolute left-0 top-0.5 bottom-0.5 grid w-[132px] grid-cols-2 overflow-hidden rounded-3xl">
         <button
           type="button"
-          onClick={() => onDecrementBuyIns(player.id)}
+          onClick={decrementBuyIns}
           disabled={player.buyIns <= 0}
           className="grid place-items-center bg-violet-600/85 text-white disabled:text-white/30 active:brightness-110"
           aria-label={`Убрать бай-ин у игрока ${player.name}`}
@@ -79,7 +95,7 @@ export function PlayerCard({
         </button>
         <button
           type="button"
-          onClick={() => onDecrementPaidEntries(player.id)}
+          onClick={decrementPaidEntries}
           disabled={player.paidEntries <= 0}
           className="grid place-items-center bg-orange-500/85 text-white disabled:text-white/30 active:brightness-110"
           aria-label={`Убрать оплату у игрока ${player.name}`}
