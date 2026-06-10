@@ -1,5 +1,6 @@
 import { normalizeCounter } from './invariants';
 import { normalizePrizeDistribution, normalizePrizeRoundingStep } from './prizes';
+import { defaultTimerLevels, normalizeTimerLevels } from './timer';
 import type { Settings } from './types';
 
 type SettingsInput = Partial<Record<keyof Settings, unknown>> & {
@@ -12,7 +13,8 @@ export const defaultSettings: Settings = {
   prizeAdjustmentPoints: 0,
   prizePlaces: 3,
   prizeDistribution: [50, 30, 20],
-  prizeRoundingStep: 100
+  prizeRoundingStep: 100,
+  timerLevels: defaultTimerLevels
 };
 
 function normalizeSignedInteger(value: unknown, fallback: number) {
@@ -30,6 +32,7 @@ export function normalizeSettings(settings: SettingsInput = {}): Settings {
     prizeAdjustmentPoints: normalizeSignedInteger(rawPrizeAdjustment, defaultSettings.prizeAdjustmentPoints),
     prizePlaces,
     prizeDistribution: normalizePrizeDistribution(settings.prizeDistribution, prizePlaces),
-    prizeRoundingStep: normalizePrizeRoundingStep(settings.prizeRoundingStep ?? defaultSettings.prizeRoundingStep)
+    prizeRoundingStep: normalizePrizeRoundingStep(settings.prizeRoundingStep ?? defaultSettings.prizeRoundingStep),
+    timerLevels: normalizeTimerLevels(settings.timerLevels)
   };
 }

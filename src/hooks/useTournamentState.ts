@@ -17,6 +17,30 @@ export function useTournamentState() {
     saveState(state);
   }, [state]);
 
+  useEffect(() => {
+    if (!state.timer.isRunning) return;
+
+    const intervalId = window.setInterval(() => {
+      dispatch({ type: 'timer/tick', now: Date.now() });
+    }, 250);
+
+    return () => window.clearInterval(intervalId);
+  }, [state.timer.isRunning]);
+
+  useEffect(() => {
+    function syncTimerAfterVisibilityChange() {
+      dispatch({ type: 'timer/tick', now: Date.now() });
+    }
+
+    window.addEventListener('focus', syncTimerAfterVisibilityChange);
+    document.addEventListener('visibilitychange', syncTimerAfterVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', syncTimerAfterVisibilityChange);
+      document.removeEventListener('visibilitychange', syncTimerAfterVisibilityChange);
+    };
+  }, []);
+
   const totals = useMemo(() => calculateTotals(state.players, state.settings), [state.players, state.settings]);
   const eliminatedPlaces = useMemo(() => getEliminatedPlaceMap(state.players), [state.players]);
   const prizePayouts = useMemo(
@@ -61,6 +85,26 @@ export function useTournamentState() {
     dispatch({ type: 'tournament/reset' });
   }
 
+  function toggleTimer() {
+    dispatch({ type: 'timer/toggle', now: Date.now() });
+  }
+
+  function nextTimerLevel() {
+    dispatch({ type: 'timer/level/next', now: Date.now() });
+  }
+
+  function previousTimerLevel() {
+    dispatch({ type: 'timer/level/previous', now: Date.now() });
+  }
+
+  function setTimerLevel(levelIndex: number) {
+    dispatch({ type: 'timer/level/set', levelIndex, now: Date.now() });
+  }
+
+  function resetTimerLevel() {
+    dispatch({ type: 'timer/reset', now: Date.now() });
+  }
+
   return {
     state,
     totals,
@@ -74,6 +118,11 @@ export function useTournamentState() {
     eliminate,
     returnToGame,
     deletePlayer,
-    reset
+    reset,
+    toggleTimer,
+    nextTimerLevel,
+    previousTimerLevel,
+    setTimerLevel,
+    resetTimerLevel
   };
 }

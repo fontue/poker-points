@@ -1,4 +1,13 @@
 export type PlayerCounterField = 'buyIns' | 'paidEntries';
+export type ColorUpChipValue = 50 | 100 | 500 | 1000;
+
+export interface TimerLevel {
+  smallBlind: number;
+  bigBlind: number;
+  ante: number;
+  durationMinutes: number;
+  colorUpChip: ColorUpChipValue | null;
+}
 
 export interface Settings {
   buyInPoints: number;
@@ -7,6 +16,15 @@ export interface Settings {
   prizePlaces: number;
   prizeDistribution: number[];
   prizeRoundingStep: number;
+  timerLevels: TimerLevel[];
+}
+
+export interface TournamentTimer {
+  currentLevelIndex: number;
+  remainingSeconds: number;
+  isRunning: boolean;
+  levelStartedAt: number | null;
+  endsAt: number | null;
 }
 
 export interface Player {
@@ -21,6 +39,7 @@ export interface Player {
 export interface TournamentState {
   settings: Settings;
   players: Player[];
+  timer: TournamentTimer;
 }
 
 export interface Totals {

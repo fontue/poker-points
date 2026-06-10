@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AppModals } from '@/components/dialogs/AppModals';
+import { PokerTimer } from '@/components/game/PokerTimer';
 import { PlayersList } from '@/components/game/PlayersList';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { FooterTotals } from '@/components/layout/FooterTotals';
@@ -85,6 +86,12 @@ export default function PokerPointsPWA() {
     closeModal();
   }
 
+  function confirmResetTimer() {
+    if (modal?.type !== 'reset-timer') return;
+    tournament.resetTimerLevel();
+    closeModal();
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-gradient-to-b from-zinc-950 via-black to-black px-4 pb-24">
@@ -93,7 +100,18 @@ export default function PokerPointsPWA() {
         <TournamentControls
           settings={tournament.state.settings}
           onSettings={appModal.openSettings}
+          onPrizeSettings={appModal.openPrizeSettings}
           onAddPlayer={openAddPlayerDialog}
+        />
+
+        <PokerTimer
+          settings={tournament.state.settings}
+          timer={tournament.state.timer}
+          onToggle={tournament.toggleTimer}
+          onPreviousLevel={tournament.previousTimerLevel}
+          onNextLevel={tournament.nextTimerLevel}
+          onResetLevel={appModal.openResetTimer}
+          onSettings={appModal.openTimerSettings}
         />
 
         <PlayersList
@@ -128,6 +146,7 @@ export default function PokerPointsPWA() {
         onConfirmDecrement={confirmDecrement}
         onConfirmDeletePlayer={confirmDeletePlayer}
         onConfirmReturnPlayer={confirmReturnPlayer}
+        onConfirmResetTimer={confirmResetTimer}
         onResetTournament={resetTournament}
       />
     </div>

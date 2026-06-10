@@ -1,8 +1,10 @@
 import { AnimatePresence } from 'framer-motion';
 import { AddPlayerDialog } from './AddPlayerDialog';
 import { ConfirmActionDialog } from './ConfirmActionDialog';
+import { PrizeSettingsDialog } from './PrizeSettingsDialog';
 import { ReferenceDialog } from './ReferenceDialog';
 import { SettingsDialog } from './SettingsDialog';
+import { TimerSettingsDialog } from './TimerSettingsDialog';
 import { TotalsDialog } from './TotalsDialog';
 import type { Player, PrizePayout, Settings, Totals } from '@/lib/game';
 import type { AppModal } from '@/lib/modal';
@@ -25,12 +27,13 @@ type AppModalsProps = {
   onConfirmDecrement: () => void;
   onConfirmDeletePlayer: () => void;
   onConfirmReturnPlayer: () => void;
+  onConfirmResetTimer: () => void;
   onResetTournament: () => void;
 };
 
 type ConfirmActions = Pick<
   AppModalsProps,
-  'onConfirmDecrement' | 'onConfirmDeletePlayer' | 'onConfirmReturnPlayer' | 'onResetTournament'
+  'onConfirmDecrement' | 'onConfirmDeletePlayer' | 'onConfirmReturnPlayer' | 'onConfirmResetTimer' | 'onResetTournament'
 >;
 
 function getConfirmDialogProps(
@@ -77,6 +80,15 @@ function getConfirmDialogProps(
     };
   }
 
+  if (modal.type === 'reset-timer') {
+    return {
+      title: 'Сбросить таймер?',
+      description: 'Таймер остановится, вернётся на первый уровень и выставит полное время первого уровня.',
+      confirmText: 'Сбросить',
+      onConfirm: actions.onConfirmResetTimer
+    };
+  }
+
   return null;
 }
 
@@ -97,12 +109,14 @@ export function AppModals({
   onConfirmDecrement,
   onConfirmDeletePlayer,
   onConfirmReturnPlayer,
+  onConfirmResetTimer,
   onResetTournament
 }: AppModalsProps) {
   const confirmDialogProps = getConfirmDialogProps(modal, modalPlayer, {
     onConfirmDecrement,
     onConfirmDeletePlayer,
     onConfirmReturnPlayer,
+    onConfirmResetTimer,
     onResetTournament
   });
 
@@ -129,6 +143,14 @@ export function AppModals({
 
     if (modal?.type === 'settings') {
       return <SettingsDialog key="settings" settings={settings} onChange={onUpdateSettings} onClose={onClose} />;
+    }
+
+    if (modal?.type === 'prize-settings') {
+      return <PrizeSettingsDialog key="prize-settings" settings={settings} onChange={onUpdateSettings} onClose={onClose} />;
+    }
+
+    if (modal?.type === 'timer-settings') {
+      return <TimerSettingsDialog key="timer-settings" settings={settings} onChange={onUpdateSettings} onClose={onClose} />;
     }
 
     if (modal?.type === 'reference') {

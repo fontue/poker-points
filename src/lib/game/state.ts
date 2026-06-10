@@ -1,10 +1,12 @@
 import { normalizePlayer } from './elimination';
 import { defaultSettings, normalizeSettings } from './settings';
+import { createDefaultTimer, normalizeTimer } from './timer';
 import type { TournamentState } from './types';
 
 export const defaultState: TournamentState = {
   settings: defaultSettings,
-  players: []
+  players: [],
+  timer: createDefaultTimer(defaultSettings)
 };
 
 export function normalizeGameState(parsedState: unknown): TournamentState {
@@ -14,9 +16,12 @@ export function normalizeGameState(parsedState: unknown): TournamentState {
       ? (parsed.settings as Record<string, unknown>)
       : {};
   const rawPlayers = 'players' in parsed && Array.isArray(parsed.players) ? parsed.players : [];
+  const settings = normalizeSettings(rawSettings);
+  const rawTimer = 'timer' in parsed && parsed.timer && typeof parsed.timer === 'object' ? parsed.timer : {};
 
   return {
-    settings: normalizeSettings(rawSettings),
-    players: rawPlayers.map(normalizePlayer)
+    settings,
+    players: rawPlayers.map(normalizePlayer),
+    timer: normalizeTimer(rawTimer, settings)
   };
 }

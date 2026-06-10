@@ -7,3 +7,4 @@ export * from './game/totals';
 export * from './game/elimination';
 export * from './game/reducer';
 export * from './game/prizes';
+export * from './game/timer';

@@ -1,6 +1,6 @@
 import type { Settings } from './game';
 
-export type ScalarSettingKey = Exclude<keyof Settings, 'prizeDistribution'>;
+export type ScalarSettingKey = Exclude<keyof Settings, 'prizeDistribution' | 'timerLevels'>;
 export type SettingSection = {
   title: string;
   fields: SettingField[];
@@ -48,18 +48,17 @@ export const settingFields: SettingField[] = [
   }
 ];
 
-export const settingsSections: SettingSection[] = [
-  {
-    title: 'Бай-ин',
-    fields: settingFields.filter((field) => field.key === 'buyInPoints' || field.key === 'buyInChips')
-  },
-  {
-    title: 'Призовой фонд',
-    fields: settingFields.filter(
-      (field) => field.key === 'prizeAdjustmentPoints' || field.key === 'prizePlaces' || field.key === 'prizeRoundingStep'
-    )
-  }
-];
+export const buyInSettingsSection: SettingSection = {
+  title: 'Бай-ин',
+  fields: settingFields.filter((field) => field.key === 'buyInPoints' || field.key === 'buyInChips')
+};
+
+export const prizeSettingsSection: SettingSection = {
+  title: 'Призовой фонд',
+  fields: settingFields.filter(
+    (field) => field.key === 'prizeAdjustmentPoints' || field.key === 'prizePlaces' || field.key === 'prizeRoundingStep'
+  )
+};
 
 export const prizeDistributionPresets: Record<number, number[]> = {
   1: [100],
