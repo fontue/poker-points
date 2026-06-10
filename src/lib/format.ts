@@ -8,7 +8,9 @@ export function clampNumber(value: number | string) {
   return Math.floor(num);
 }
 
-export function normalizeNumberInput(value: string) {
-  const onlyDigits = value.replace(/\D/g, '');
-  return onlyDigits.replace(/^0+(?=\d)/, '');
+export function normalizeNumberInput(value: string, allowNegative = false) {
+  const sign = allowNegative && value.trim().startsWith('-') ? '-' : '';
+  const onlyDigits = value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+
+  return `${sign}${onlyDigits}`;
 }

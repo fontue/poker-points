@@ -4,7 +4,7 @@ import { ConfirmActionDialog } from './ConfirmActionDialog';
 import { ReferenceDialog } from './ReferenceDialog';
 import { SettingsDialog } from './SettingsDialog';
 import { TotalsDialog } from './TotalsDialog';
-import type { Player, Settings, Totals } from '@/lib/game';
+import type { Player, PrizePayout, Settings, Totals } from '@/lib/game';
 import type { AppModal } from '@/lib/modal';
 import type { ConfirmActionDialogProps } from './ConfirmActionDialog';
 
@@ -13,6 +13,7 @@ type AppModalsProps = {
   modalPlayer: Player | null;
   settings: Settings;
   totals: Totals;
+  prizePayouts: PrizePayout[];
   playerName: string;
   playerNamesHistory: string[];
   existingPlayerNames: string[];
@@ -84,6 +85,7 @@ export function AppModals({
   modalPlayer,
   settings,
   totals,
+  prizePayouts,
   playerName,
   playerNamesHistory,
   existingPlayerNames,
@@ -134,7 +136,7 @@ export function AppModals({
     }
 
     if (modal?.type === 'totals') {
-      return <TotalsDialog key="totals" totals={totals} onClose={onClose} />;
+      return <TotalsDialog key="totals" totals={totals} prizePayouts={prizePayouts} onClose={onClose} />;
     }
 
     return null;

@@ -3,7 +3,7 @@ import { formatNumber } from '@/lib/format';
 import { totalMetrics } from '@/lib/metrics';
 import { metricTones } from '@/lib/ui';
 import { AppDialog } from './AppDialog';
-import type { Totals } from '@/lib/game';
+import type { PrizePayout, Totals } from '@/lib/game';
 import type { MetricTone } from '@/lib/ui';
 
 type TotalRowProps = {
@@ -25,12 +25,34 @@ function TotalRow({ label, value, suffix = '', tone }: TotalRowProps) {
   );
 }
 
+type PrizePayoutRowProps = {
+  payout: PrizePayout;
+};
+
+function PrizePayoutRow({ payout }: PrizePayoutRowProps) {
+  return (
+    <div className="rounded-2xl bg-zinc-900 px-4 py-3 ring-1 ring-white/10">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-black text-yellow-100">{payout.place} место</div>
+          <div className="truncate text-xs font-bold text-zinc-500">{payout.playerName || 'Игрок ещё не определён'}</div>
+        </div>
+        <div className="text-right">
+          <div className="text-lg font-black text-yellow-100">{formatNumber(payout.amount)}P</div>
+          <div className="text-xs font-bold text-yellow-200/70">{formatNumber(payout.percent)}%</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type TotalsDialogProps = {
   totals: Totals;
+  prizePayouts: PrizePayout[];
   onClose: () => void;
 };
 
-export function TotalsDialog({ totals, onClose }: TotalsDialogProps) {
+export function TotalsDialog({ totals, prizePayouts, onClose }: TotalsDialogProps) {
   return (
     <AppDialog onClose={onClose}>
       <div className="mb-4">
@@ -47,6 +69,15 @@ export function TotalsDialog({ totals, onClose }: TotalsDialogProps) {
             tone={metricTones[metric.tone]}
           />
         ))}
+      </div>
+
+      <div className="mt-4">
+        <div className="mb-2 text-left text-sm font-black text-zinc-100">Призовые места</div>
+        <div className="space-y-2">
+          {prizePayouts.map((payout) => (
+            <PrizePayoutRow key={payout.place} payout={payout} />
+          ))}
+        </div>
       </div>
 
       <div className="mt-4 grid">

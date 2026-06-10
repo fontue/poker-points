@@ -10,7 +10,7 @@ export function calculateTotals(players: Player[], settings: Settings): Totals {
   return {
     pointsInGame,
     pointsPaidByTokens: paidEntries * settings.buyInPoints,
-    prizePoints: Math.max(0, pointsInGame - settings.commission),
+    prizePoints: Math.max(0, pointsInGame - settings.prizeAdjustmentPoints),
     chipsInGame,
     activePlayersCount,
     averageStack: activePlayersCount > 0 ? Math.floor(chipsInGame / activePlayersCount) : 0

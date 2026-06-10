@@ -1,7 +1,6 @@
-import { clampNumber } from '../format';
 import { addPlayerToState, decrementPlayerField, deletePlayerFromState, incrementPlayerField } from './players';
 import { eliminatePlayer, returnPlayerToGame } from './elimination';
-import { defaultState } from './state';
+import { normalizeSettings } from './settings';
 import type { PlayerCounterField, Settings, TournamentState } from './types';
 
 export type TournamentAction =
@@ -17,10 +16,7 @@ export type TournamentAction =
 function updateSettings(state: TournamentState, patch: Partial<Settings>): TournamentState {
   return {
     ...state,
-    settings: {
-      ...state.settings,
-      ...Object.fromEntries(Object.entries(patch).map(([key, value]) => [key, clampNumber(value)]))
-    }
+    settings: normalizeSettings({ ...state.settings, ...patch })
   };
 }
 
@@ -45,7 +41,7 @@ export function tournamentReducer(state: TournamentState, action: TournamentActi
     case 'player/delete':
       return deletePlayerFromState(state, action.playerId);
     case 'tournament/reset':
-      return defaultState;
+      return { ...state, players: [] };
     default:
       return assertNever(action);
   }

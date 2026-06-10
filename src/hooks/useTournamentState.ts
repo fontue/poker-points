@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer } from 'react';
 import {
+  calculatePrizePayouts,
   calculateTotals,
   getEliminatedPlaceMap,
   hasDuplicatePlayerName,
@@ -18,6 +19,10 @@ export function useTournamentState() {
 
   const totals = useMemo(() => calculateTotals(state.players, state.settings), [state.players, state.settings]);
   const eliminatedPlaces = useMemo(() => getEliminatedPlaceMap(state.players), [state.players]);
+  const prizePayouts = useMemo(
+    () => calculatePrizePayouts(totals.prizePoints, state.settings, state.players, eliminatedPlaces),
+    [eliminatedPlaces, state.players, state.settings, totals.prizePoints]
+  );
   const existingPlayerNames = useMemo(() => state.players.map((player) => player.name), [state.players]);
 
   function updateSettings(settingsPatch: Partial<Settings>) {
@@ -59,6 +64,7 @@ export function useTournamentState() {
   return {
     state,
     totals,
+    prizePayouts,
     eliminatedPlaces,
     existingPlayerNames,
     updateSettings,

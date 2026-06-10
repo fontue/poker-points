@@ -3,7 +3,10 @@ export type PlayerCounterField = 'buyIns' | 'paidEntries';
 export interface Settings {
   buyInPoints: number;
   buyInChips: number;
-  commission: number;
+  prizeAdjustmentPoints: number;
+  prizePlaces: number;
+  prizeDistribution: number[];
+  prizeRoundingStep: number;
 }
 
 export interface Player {
@@ -27,4 +30,12 @@ export interface Totals {
   chipsInGame: number;
   activePlayersCount: number;
   averageStack: number;
+}
+
+export interface PrizePayout {
+  place: number;
+  percent: number;
+  effectivePercent: number;
+  amount: number;
+  playerName: string | null;
 }

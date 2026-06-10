@@ -23,7 +23,8 @@ export function AppDialog({ children, align = 'bottom', onClose }: AppDialogProp
         initial={{ y: isTop ? 16 : 40, opacity: 0, scale: isTop ? 0.98 : 1 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         exit={{ y: isTop ? 16 : 40, opacity: 0, scale: isTop ? 0.98 : 1 }}
-        className="w-full max-w-[430px] rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
+        style={{ maxHeight: isTop ? 'calc(90dvh - 1rem)' : 'calc(100dvh - 1rem)' }}
+        className="w-full max-w-[430px] overflow-y-auto overscroll-contain rounded-3xl bg-zinc-950 p-5 text-white shadow-2xl ring-1 ring-white/10"
       >
         {children}
       </motion.div>
