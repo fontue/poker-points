@@ -39,7 +39,7 @@ export function TimerSettingsDialog({ settings, onChange, onClose }: TimerSettin
         onRemove={form.removeTimerLevel}
       />
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="sticky -bottom-5 -mx-5 -mb-5 mt-4 grid grid-cols-2 gap-2 border-t border-white/10 bg-zinc-950 px-5 pb-5 pt-3">
         <Button onClick={form.resetToDefaultLevels} className="h-12 rounded-2xl bg-zinc-700 font-bold text-zinc-100">
           Сбросить
         </Button>

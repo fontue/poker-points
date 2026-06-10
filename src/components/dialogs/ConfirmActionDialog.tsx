@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { AppDialog } from './AppDialog';
 
-type ConfirmTone = 'destructive' | 'primary';
+type ConfirmTone = 'destructive' | 'primary' | 'warning';
 
 const confirmButtonClasses = {
   destructive: 'bg-red-600 text-white',
-  primary: 'bg-violet-600 text-white'
+  primary: 'bg-violet-600 text-white',
+  warning: 'bg-orange-500 text-white'
 } satisfies Record<ConfirmTone, string>;
 
 export type ConfirmActionDialogProps = {

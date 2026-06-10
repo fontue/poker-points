@@ -32,8 +32,8 @@ export const metricTones = {
 
 export function getPlayerCardClass(isEliminated: boolean, place?: number) {
   if (!isEliminated) return 'bg-zinc-900';
-  if (place === 1) return 'bg-yellow-500/35 ring-yellow-300/50';
-  if (place === 2) return 'bg-zinc-300/30 ring-zinc-100/45';
-  if (place === 3) return 'bg-orange-700/45 ring-orange-300/50';
-  return 'bg-red-500/10 ring-red-400/15';
+  if (place === 1) return 'bg-zinc-900';
+  if (place === 2) return 'bg-zinc-900';
+  if (place === 3) return 'bg-zinc-900';
+  return 'bg-zinc-900';
 }

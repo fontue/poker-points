@@ -17,13 +17,13 @@ export type SettingField = {
 export const settingFields: SettingField[] = [
   {
     key: 'buyInPoints',
-    label: 'Стоимость 1 бай-ина в поинтах',
+    label: 'Стоимость бай-ина',
     minValue: 1,
     placeholder: '1'
   },
   {
     key: 'buyInChips',
-    label: 'Сколько фишек в 1 бай-ине',
+    label: 'Фишек за бай-ин',
     minValue: 1,
     placeholder: '1'
   },

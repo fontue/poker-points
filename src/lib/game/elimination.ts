@@ -21,12 +21,19 @@ export function normalizePlayer(player: LegacyPlayer, index: number): Player {
 }
 
 export function getEliminatedPlaceMap(players: Player[]): Map<string, number> {
+  const activePlayers = players.filter((player) => !player.isEliminated);
   const eliminatedPlayers = players
     .map((player, index) => ({ player, index }))
     .filter(({ player }) => player.isEliminated)
     .sort((a, b) => (a.player.eliminatedAt || 0) - (b.player.eliminatedAt || 0) || a.index - b.index);
 
-  return new Map(eliminatedPlayers.map(({ player }, index) => [player.id, players.length - index]));
+  const placeMap = new Map(eliminatedPlayers.map(({ player }, index) => [player.id, players.length - index]));
+
+  if (activePlayers.length === 1 && players.length > 1) {
+    placeMap.set(activePlayers[0].id, 1);
+  }
+
+  return placeMap;
 }
 
 export function eliminatePlayer(state: TournamentState, playerId: string, eliminatedAt: number): TournamentState {

@@ -45,10 +45,21 @@ function getConfirmDialogProps(
   if (!modal) return null;
 
   if (modal.type === 'decrement-player-field') {
+    if (modal.field === 'buyIns') {
+      return {
+        title: 'Уменьшить бай-ин?',
+        description: `У игрока «${modal.playerName}» будет убран один бай-ин. Если оплат больше, они тоже будут скорректированы.`,
+        confirmText: 'Убрать бай-ин',
+        confirmTone: 'primary' as const,
+        onConfirm: actions.onConfirmDecrement
+      };
+    }
+
     return {
-      title: 'Подтвердить уменьшение?',
-      description: `Это действие уменьшит параметр игрока «${modal.playerName}».`,
-      confirmText: 'Уменьшить',
+      title: 'Уменьшить оплату?',
+      description: `У игрока «${modal.playerName}» будет убрана одна оплаченная запись.`,
+      confirmText: 'Убрать оплату',
+      confirmTone: 'warning' as const,
       onConfirm: actions.onConfirmDecrement
     };
   }
