@@ -14,7 +14,10 @@ export const defaultSettings: Settings = {
   prizePlaces: 3,
   prizeDistribution: [50, 30, 20],
   prizeRoundingStep: 100,
-  timerLevels: defaultTimerLevels
+  timerLevels: defaultTimerLevels,
+  timerSoundEnabled: false,
+  timerVibrationEnabled: false,
+  timerNotificationEnabled: false
 };
 
 function normalizeSignedInteger(value: unknown, fallback: number) {
@@ -33,6 +36,9 @@ export function normalizeSettings(settings: SettingsInput = {}): Settings {
     prizePlaces,
     prizeDistribution: normalizePrizeDistribution(settings.prizeDistribution, prizePlaces),
     prizeRoundingStep: normalizePrizeRoundingStep(settings.prizeRoundingStep ?? defaultSettings.prizeRoundingStep),
-    timerLevels: normalizeTimerLevels(settings.timerLevels)
+    timerLevels: normalizeTimerLevels(settings.timerLevels),
+    timerSoundEnabled: Boolean(settings.timerSoundEnabled),
+    timerVibrationEnabled: Boolean(settings.timerVibrationEnabled),
+    timerNotificationEnabled: Boolean(settings.timerNotificationEnabled)
   };
 }

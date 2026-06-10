@@ -70,7 +70,8 @@ export function createDefaultTimer(settings: Settings): TournamentTimer {
     remainingSeconds: getLevelDurationSeconds(settings.timerLevels[0]),
     isRunning: false,
     levelStartedAt: null,
-    endsAt: null
+    endsAt: null,
+    lastCompletedLevelIndex: null
   };
 }
 
@@ -80,9 +81,11 @@ export function advanceTimerToTime(timer: TournamentTimer, settings: Settings, n
   let currentLevelIndex = timer.currentLevelIndex;
   let levelStartedAt = timer.levelStartedAt;
   let endsAt = timer.endsAt;
+  let lastCompletedLevelIndex: number | null = null;
   const lastLevelIndex = Math.max(0, settings.timerLevels.length - 1);
 
   while (now >= endsAt && currentLevelIndex < lastLevelIndex) {
+    lastCompletedLevelIndex = currentLevelIndex;
     currentLevelIndex += 1;
     levelStartedAt = endsAt;
     endsAt = levelStartedAt + getLevelDurationSeconds(settings.timerLevels[currentLevelIndex]) * 1000;
@@ -96,7 +99,8 @@ export function advanceTimerToTime(timer: TournamentTimer, settings: Settings, n
     remainingSeconds,
     isRunning,
     levelStartedAt: isRunning ? levelStartedAt : null,
-    endsAt: isRunning ? endsAt : null
+    endsAt: isRunning ? endsAt : null,
+    lastCompletedLevelIndex
   };
 }
 
@@ -108,12 +112,14 @@ export function normalizeTimer(timer: unknown, settings: Settings): TournamentTi
   const remainingSeconds = Math.max(0, normalizeCounter(rawTimer.remainingSeconds ?? defaultRemainingSeconds));
   const levelStartedAt = Number(rawTimer.levelStartedAt);
   const endsAt = Number(rawTimer.endsAt);
+  const lastCompletedLevelIndex = Number(rawTimer.lastCompletedLevelIndex);
   const normalizedTimer = {
     currentLevelIndex,
     remainingSeconds,
     isRunning: Boolean(rawTimer.isRunning),
     levelStartedAt: Number.isFinite(levelStartedAt) && levelStartedAt > 0 ? levelStartedAt : null,
-    endsAt: Number.isFinite(endsAt) && endsAt > 0 ? endsAt : null
+    endsAt: Number.isFinite(endsAt) && endsAt > 0 ? endsAt : null,
+    lastCompletedLevelIndex: Number.isFinite(lastCompletedLevelIndex) && lastCompletedLevelIndex >= 0 ? lastCompletedLevelIndex : null
   };
 
   return advanceTimerToTime(normalizedTimer, settings, Date.now());
@@ -131,7 +137,8 @@ export function syncTimerWithSettings(timer: TournamentTimer, settings: Settings
     currentLevelIndex,
     remainingSeconds,
     levelStartedAt: timer.isRunning ? now : null,
-    endsAt: timer.isRunning ? now + remainingSeconds * 1000 : null
+    endsAt: timer.isRunning ? now + remainingSeconds * 1000 : null,
+    lastCompletedLevelIndex: null
   };
 }
 

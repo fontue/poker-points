@@ -12,6 +12,7 @@ export function useAppModal() {
     openSettings: () => setModal({ type: 'settings' }),
     openPrizeSettings: () => setModal({ type: 'prize-settings' }),
     openTimerSettings: () => setModal({ type: 'timer-settings' }),
+    openTimerAlertSettings: () => setModal({ type: 'timer-alert-settings' }),
     openReference: () => setModal({ type: 'reference' }),
     openTotals: () => setModal({ type: 'totals' }),
     openResetTimer: () => setModal({ type: 'reset-timer' }),

@@ -17,6 +17,9 @@ export interface Settings {
   prizeDistribution: number[];
   prizeRoundingStep: number;
   timerLevels: TimerLevel[];
+  timerSoundEnabled: boolean;
+  timerVibrationEnabled: boolean;
+  timerNotificationEnabled: boolean;
 }
 
 export interface TournamentTimer {
@@ -25,6 +28,7 @@ export interface TournamentTimer {
   isRunning: boolean;
   levelStartedAt: number | null;
   endsAt: number | null;
+  lastCompletedLevelIndex: number | null;
 }
 
 export interface Player {

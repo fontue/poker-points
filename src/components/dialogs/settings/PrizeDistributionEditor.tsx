@@ -27,7 +27,7 @@ export function PrizeDistributionEditor({
   return (
     <div className="mt-4 rounded-3xl bg-zinc-900 p-3 text-left ring-1 ring-white/10">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="text-sm font-black text-zinc-100">Распределение призовых, %</div>
+        <div className="text-sm font-black text-zinc-100">Распределение призовых</div>
         <div className="flex items-center gap-2">
           {isValid && (
             <button type="button" onClick={onInfo} className="rounded-xl bg-white/10 p-2 text-zinc-300 active:scale-95">

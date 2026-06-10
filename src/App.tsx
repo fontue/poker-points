@@ -112,6 +112,7 @@ export default function PokerPointsPWA() {
           onNextLevel={tournament.nextTimerLevel}
           onResetLevel={appModal.openResetTimer}
           onSettings={appModal.openTimerSettings}
+          onAlertSettings={appModal.openTimerAlertSettings}
         />
 
         <PlayersList

@@ -42,7 +42,8 @@ function setTimerLevel(state: TournamentState, levelIndex: number, now: number):
       currentLevelIndex,
       remainingSeconds,
       levelStartedAt: state.timer.isRunning ? now : null,
-      endsAt: state.timer.isRunning ? now + remainingSeconds * 1000 : null
+      endsAt: state.timer.isRunning ? now + remainingSeconds * 1000 : null,
+      lastCompletedLevelIndex: null
     }
   };
 }
@@ -56,7 +57,8 @@ function toggleTimer(state: TournamentState, now: number): TournamentState {
         ...timer,
         isRunning: false,
         levelStartedAt: null,
-        endsAt: null
+        endsAt: null,
+        lastCompletedLevelIndex: null
       }
     };
   }
@@ -69,7 +71,8 @@ function toggleTimer(state: TournamentState, now: number): TournamentState {
       ...timer,
       isRunning: true,
       levelStartedAt: now,
-      endsAt: now + timer.remainingSeconds * 1000
+      endsAt: now + timer.remainingSeconds * 1000,
+      lastCompletedLevelIndex: null
     }
   };
 }
@@ -120,9 +123,17 @@ export function tournamentReducer(state: TournamentState, action: TournamentActi
     case 'timer/level/previous':
       return setTimerLevel(state, state.timer.currentLevelIndex - 1, action.now);
     case 'timer/reset':
-      return setTimerLevel({ ...state, timer: { ...state.timer, isRunning: false, levelStartedAt: null, endsAt: null } }, 0, action.now);
+      return setTimerLevel(
+        { ...state, timer: { ...state.timer, isRunning: false, levelStartedAt: null, endsAt: null, lastCompletedLevelIndex: null } },
+        0,
+        action.now
+      );
     case 'tournament/reset':
-      return { ...state, players: [], timer: { ...state.timer, isRunning: false, levelStartedAt: null, endsAt: null } };
+      return {
+        ...state,
+        players: [],
+        timer: { ...state.timer, isRunning: false, levelStartedAt: null, endsAt: null, lastCompletedLevelIndex: null }
+      };
     default:
       return assertNever(action);
   }

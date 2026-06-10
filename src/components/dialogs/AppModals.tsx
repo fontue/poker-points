@@ -4,6 +4,7 @@ import { ConfirmActionDialog } from './ConfirmActionDialog';
 import { PrizeSettingsDialog } from './PrizeSettingsDialog';
 import { ReferenceDialog } from './ReferenceDialog';
 import { SettingsDialog } from './SettingsDialog';
+import { TimerAlertSettingsDialog } from './TimerAlertSettingsDialog';
 import { TimerSettingsDialog } from './TimerSettingsDialog';
 import { TotalsDialog } from './TotalsDialog';
 import type { Player, PrizePayout, Settings, Totals } from '@/lib/game';
@@ -151,6 +152,10 @@ export function AppModals({
 
     if (modal?.type === 'timer-settings') {
       return <TimerSettingsDialog key="timer-settings" settings={settings} onChange={onUpdateSettings} onClose={onClose} />;
+    }
+
+    if (modal?.type === 'timer-alert-settings') {
+      return <TimerAlertSettingsDialog key="timer-alert-settings" settings={settings} onChange={onUpdateSettings} onClose={onClose} />;
     }
 
     if (modal?.type === 'reference') {

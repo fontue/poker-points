@@ -1,6 +1,7 @@
-import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw, Settings2 } from 'lucide-react';
+import { BellRing, ChevronLeft, ChevronRight, Pause, Play, RotateCcw, Settings2 } from 'lucide-react';
 import { formatNumber } from '@/lib/format';
 import { colorUpChipTones } from '@/lib/game';
+import { prepareTimerAlerts } from '@/lib/timerAlerts';
 import type { Settings, TournamentTimer } from '@/lib/game';
 
 type PokerTimerProps = {
@@ -11,6 +12,7 @@ type PokerTimerProps = {
   onNextLevel: () => void;
   onResetLevel: () => void;
   onSettings: () => void;
+  onAlertSettings: () => void;
 };
 
 function formatTimerTime(totalSeconds: number) {
@@ -19,10 +21,27 @@ function formatTimerTime(totalSeconds: number) {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-export function PokerTimer({ settings, timer, onToggle, onPreviousLevel, onNextLevel, onResetLevel, onSettings }: PokerTimerProps) {
+export function PokerTimer({
+  settings,
+  timer,
+  onToggle,
+  onPreviousLevel,
+  onNextLevel,
+  onResetLevel,
+  onSettings,
+  onAlertSettings
+}: PokerTimerProps) {
   const level = settings.timerLevels[timer.currentLevelIndex] || settings.timerLevels[0];
   const isFirstLevel = timer.currentLevelIndex === 0;
   const isLastLevel = timer.currentLevelIndex >= settings.timerLevels.length - 1;
+
+  function toggleTimer() {
+    prepareTimerAlerts({
+      sound: settings.timerSoundEnabled,
+      vibration: settings.timerVibrationEnabled
+    });
+    onToggle();
+  }
 
   return (
     <section className="mb-4 rounded-3xl bg-zinc-900 p-4 text-left ring-1 ring-white/10">
@@ -45,7 +64,7 @@ export function PokerTimer({ settings, timer, onToggle, onPreviousLevel, onNextL
         {formatTimerTime(timer.remainingSeconds)}
       </div>
 
-      <div className="grid grid-cols-[3rem_1fr_3rem_3rem_3rem] gap-2">
+      <div className="grid grid-cols-[2.75rem_1fr_2.75rem_2.75rem_2.75rem_2.75rem] gap-2">
         <button
           type="button"
           disabled={isFirstLevel}
@@ -57,11 +76,11 @@ export function PokerTimer({ settings, timer, onToggle, onPreviousLevel, onNextL
         </button>
         <button
           type="button"
-          onClick={onToggle}
-          className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-violet-600 text-sm font-black text-white active:scale-[0.99]"
+          onClick={toggleTimer}
+          className="grid h-12 place-items-center rounded-2xl bg-violet-600 text-white active:scale-[0.99]"
+          aria-label={timer.isRunning ? 'Пауза' : 'Старт'}
         >
           {timer.isRunning ? <Pause size={18} /> : <Play size={18} />}
-          {timer.isRunning ? 'Пауза' : 'Старт'}
         </button>
         <button
           type="button"
@@ -87,6 +106,14 @@ export function PokerTimer({ settings, timer, onToggle, onPreviousLevel, onNextL
           aria-label="Настройки таймера"
         >
           <Settings2 size={19} />
+        </button>
+        <button
+          type="button"
+          onClick={onAlertSettings}
+          className="grid h-12 place-items-center rounded-2xl bg-black text-zinc-200 active:scale-95"
+          aria-label="Сопровождение таймера"
+        >
+          <BellRing size={19} />
         </button>
       </div>
     </section>

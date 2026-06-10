@@ -5,6 +5,7 @@ export type AppModal =
   | { type: 'settings' }
   | { type: 'prize-settings' }
   | { type: 'timer-settings' }
+  | { type: 'timer-alert-settings' }
   | { type: 'reference' }
   | { type: 'totals' }
   | { type: 'reset-timer' }

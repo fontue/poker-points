@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from 'react';
+import { useEffect, useMemo, useReducer, useRef } from 'react';
 import {
   calculatePrizePayouts,
   calculateTotals,
@@ -9,9 +9,11 @@ import {
 } from '@/lib/game';
 import type { PlayerCounterField, Settings } from '@/lib/game';
 import { loadState, saveState } from '@/lib/storage';
+import { triggerTimerLevelAlert } from '@/lib/timerAlerts';
 
 export function useTournamentState() {
   const [state, dispatch] = useReducer(tournamentReducer, undefined, loadState);
+  const handledCompletedLevelRef = useRef<number | null>(null);
 
   useEffect(() => {
     saveState(state);
@@ -40,6 +42,34 @@ export function useTournamentState() {
       document.removeEventListener('visibilitychange', syncTimerAfterVisibilityChange);
     };
   }, []);
+
+  useEffect(() => {
+    const completedLevelIndex = state.timer.lastCompletedLevelIndex;
+    if (completedLevelIndex === null) {
+      handledCompletedLevelRef.current = null;
+      return;
+    }
+    if (handledCompletedLevelRef.current === completedLevelIndex) return;
+
+    handledCompletedLevelRef.current = completedLevelIndex;
+    const currentLevel = state.settings.timerLevels[state.timer.currentLevelIndex];
+    if (!currentLevel) return;
+
+    triggerTimerLevelAlert({
+      sound: state.settings.timerSoundEnabled,
+      vibration: state.settings.timerVibrationEnabled,
+      notification: state.settings.timerNotificationEnabled,
+      levelIndex: state.timer.currentLevelIndex,
+      level: currentLevel
+    });
+  }, [
+    state.settings.timerLevels,
+    state.settings.timerNotificationEnabled,
+    state.settings.timerSoundEnabled,
+    state.settings.timerVibrationEnabled,
+    state.timer.currentLevelIndex,
+    state.timer.lastCompletedLevelIndex
+  ]);
 
   const totals = useMemo(() => calculateTotals(state.players, state.settings), [state.players, state.settings]);
   const eliminatedPlaces = useMemo(() => getEliminatedPlaceMap(state.players), [state.players]);
