@@ -218,7 +218,7 @@ private struct PokerTimerLiveActivityView: View {
 
                 Spacer(minLength: 8)
 
-                TimerText(level: level, isRunning: context.state.isRunning, size: 34)
+                TimerText(level: level, isRunning: context.state.isRunning, size: 34, usesSystemCountdown: true)
                     .frame(width: 116, alignment: .trailing)
             }
         }

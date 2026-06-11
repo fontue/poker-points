@@ -3,25 +3,24 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
-		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
-		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
-		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
-		AA0000010000000000000007 /* AppViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000018 /* AppViewController.swift */; };
-		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
-		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
-		AA0000010000000000000001 /* PokerTimerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000011 /* PokerTimerActivityAttributes.swift */; };
-		AA0000010000000000000002 /* PokerTimerLiveActivityPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000012 /* PokerTimerLiveActivityPlugin.swift */; };
-		AA0000010000000000000003 /* PokerTimerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000011 /* PokerTimerActivityAttributes.swift */; };
+		AA0000010000000000000001 /* LiveActivity/PokerTimerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000011 /* LiveActivity/PokerTimerActivityAttributes.swift */; };
+		AA0000010000000000000003 /* LiveActivity/PokerTimerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000011 /* LiveActivity/PokerTimerActivityAttributes.swift */; };
 		AA0000010000000000000004 /* PokerTimerLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000014 /* PokerTimerLiveActivityBundle.swift */; };
 		AA0000010000000000000005 /* PokerTimerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000015 /* PokerTimerLiveActivity.swift */; };
-		AA0000010000000000000006 /* PokerTimerLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000016 /* PokerTimerLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AA0000010000000000000006 /* PokerTimerLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000016 /* PokerTimerLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AA0000010000000000000008 /* NativePokerPointsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000019 /* NativePokerPointsView.swift */; };
+		AA0000010000000000000009 /* PokerPointsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000001A /* PokerPointsApp.swift */; };
+		AA000001000000000000000A /* Native/Models/NativeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000001B /* Native/Models/NativeModels.swift */; };
+		AA000001000000000000000B /* Native/Store/NativeTournamentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000001C /* Native/Store/NativeTournamentStore.swift */; };
+		AA000001000000000000000C /* Native/LiveActivity/NativeLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000001D /* Native/LiveActivity/NativeLiveActivityManager.swift */; };
+		AA000001000000000000000D /* Native/Models/NativeReferenceContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000001E /* Native/Models/NativeReferenceContent.swift */; };
+		AA000001000000000000000E /* Native/Services/NativeTimerAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000001F /* Native/Services/NativeTimerAlertManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,37 +34,37 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		AA0000010000000000000022 /* Embed App Extensions */ = {
+		AA0000010000000000000022 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				AA0000010000000000000006 /* PokerTimerLiveActivity.appex in Embed App Extensions */,
+				AA0000010000000000000006 /* PokerTimerLiveActivity.appex in Embed Foundation Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
-		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		AA0000010000000000000018 /* AppViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewController.swift; sourceTree = "<group>"; };
-		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
-		AA0000010000000000000011 /* PokerTimerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivity/PokerTimerActivityAttributes.swift; sourceTree = "<group>"; };
-		AA0000010000000000000012 /* PokerTimerLiveActivityPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivity/PokerTimerLiveActivityPlugin.swift; sourceTree = "<group>"; };
+		AA0000010000000000000011 /* LiveActivity/PokerTimerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivity/PokerTimerActivityAttributes.swift; sourceTree = "<group>"; };
 		AA0000010000000000000014 /* PokerTimerLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokerTimerLiveActivityBundle.swift; sourceTree = "<group>"; };
 		AA0000010000000000000015 /* PokerTimerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokerTimerLiveActivity.swift; sourceTree = "<group>"; };
 		AA0000010000000000000016 /* PokerTimerLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PokerTimerLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000010000000000000017 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA0000010000000000000019 /* NativePokerPointsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePokerPointsView.swift; sourceTree = "<group>"; };
+		AA000001000000000000001A /* PokerPointsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokerPointsApp.swift; sourceTree = "<group>"; };
+		AA000001000000000000001B /* Native/Models/NativeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Native/Models/NativeModels.swift; sourceTree = "<group>"; };
+		AA000001000000000000001C /* Native/Store/NativeTournamentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Native/Store/NativeTournamentStore.swift; sourceTree = "<group>"; };
+		AA000001000000000000001D /* Native/LiveActivity/NativeLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Native/LiveActivity/NativeLiveActivityManager.swift; sourceTree = "<group>"; };
+		AA000001000000000000001E /* Native/Models/NativeReferenceContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Native/Models/NativeReferenceContent.swift; sourceTree = "<group>"; };
+		AA000001000000000000001F /* Native/Services/NativeTimerAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Native/Services/NativeTimerAlertManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,7 +72,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,17 +107,17 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
-				50379B222058CBB4000EE86E /* capacitor.config.json */,
-				504EC3071FED79650016851F /* AppDelegate.swift */,
-				AA0000010000000000000018 /* AppViewController.swift */,
-				AA0000010000000000000011 /* PokerTimerActivityAttributes.swift */,
-				AA0000010000000000000012 /* PokerTimerLiveActivityPlugin.swift */,
-				504EC30B1FED79650016851F /* Main.storyboard */,
+				AA000001000000000000001A /* PokerPointsApp.swift */,
+				AA0000010000000000000019 /* NativePokerPointsView.swift */,
+				AA000001000000000000001B /* Native/Models/NativeModels.swift */,
+				AA000001000000000000001E /* Native/Models/NativeReferenceContent.swift */,
+				AA000001000000000000001C /* Native/Store/NativeTournamentStore.swift */,
+				AA000001000000000000001D /* Native/LiveActivity/NativeLiveActivityManager.swift */,
+				AA000001000000000000001F /* Native/Services/NativeTimerAlertManager.swift */,
+				AA0000010000000000000011 /* LiveActivity/PokerTimerActivityAttributes.swift */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
 				504EC3131FED79650016851F /* Info.plist */,
-				2FAD9762203C412B000D30F8 /* config.xml */,
-				50B271D01FEDC1A000F3C39B /* public */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -144,7 +142,7 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
-				AA0000010000000000000022 /* Embed App Extensions */,
+				AA0000010000000000000022 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -153,7 +151,6 @@
 			);
 			name = App;
 			packageProductDependencies = (
-				4D22ABE82AF431CB00220026 /* CapApp-SPM */,
 			);
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
@@ -184,8 +181,9 @@
 		504EC2FC1FED79650016851F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 0920;
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					504EC3031FED79650016851F = {
 						CreatedOnToolsVersion = 9.2;
@@ -208,7 +206,6 @@
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
 			packageReferences = (
-				D4C12C0A2AAA248700AAC8A2 /* XCLocalSwiftPackageReference "CapApp-SPM" */,
 			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
@@ -226,11 +223,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
-				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
-				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
-				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
-				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -248,10 +241,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
-				AA0000010000000000000007 /* AppViewController.swift in Sources */,
-				AA0000010000000000000001 /* PokerTimerActivityAttributes.swift in Sources */,
-				AA0000010000000000000002 /* PokerTimerLiveActivityPlugin.swift in Sources */,
+				AA0000010000000000000009 /* PokerPointsApp.swift in Sources */,
+				AA0000010000000000000008 /* NativePokerPointsView.swift in Sources */,
+				AA000001000000000000000A /* Native/Models/NativeModels.swift in Sources */,
+				AA000001000000000000000B /* Native/Store/NativeTournamentStore.swift in Sources */,
+				AA000001000000000000000C /* Native/LiveActivity/NativeLiveActivityManager.swift in Sources */,
+				AA000001000000000000000D /* Native/Models/NativeReferenceContent.swift in Sources */,
+				AA000001000000000000000E /* Native/Services/NativeTimerAlertManager.swift in Sources */,
+				AA0000010000000000000001 /* LiveActivity/PokerTimerActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,7 +256,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0000010000000000000003 /* PokerTimerActivityAttributes.swift in Sources */,
+				AA0000010000000000000003 /* LiveActivity/PokerTimerActivityAttributes.swift in Sources */,
 				AA0000010000000000000004 /* PokerTimerLiveActivityBundle.swift in Sources */,
 				AA0000010000000000000005 /* PokerTimerLiveActivity.swift in Sources */,
 			);
@@ -276,14 +273,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		504EC30B1FED79650016851F /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				504EC30C1FED79650016851F /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		504EC3101FED79650016851F /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -310,6 +299,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -317,8 +307,10 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -328,8 +320,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = N4QAW2CH34;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -348,6 +342,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -367,6 +362,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -374,8 +370,10 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -385,8 +383,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = N4QAW2CH34;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -398,6 +398,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
@@ -411,9 +412,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N4QAW2CH34;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -434,9 +434,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N4QAW2CH34;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -457,10 +456,9 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N4QAW2CH34;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PokerTimerLiveActivity/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -482,10 +480,9 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = N4QAW2CH34;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PokerTimerLiveActivity/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -532,21 +529,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		D4C12C0A2AAA248700AAC8A2 /* XCLocalSwiftPackageReference "CapApp-SPM" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "CapApp-SPM";
-		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		4D22ABE82AF431CB00220026 /* CapApp-SPM */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D4C12C0A2AAA248700AAC8A2 /* XCLocalSwiftPackageReference "CapApp-SPM" */;
-			productName = "CapApp-SPM";
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 504EC2FC1FED79650016851F /* Project object */;
 }
