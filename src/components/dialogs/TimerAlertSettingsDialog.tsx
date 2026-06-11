@@ -1,4 +1,6 @@
 import { Button } from '@/components/ui/button';
+import { Capacitor } from '@capacitor/core';
+import { requestNativeTimerNotificationPermission } from '@/lib/nativeTimerNotifications';
 import { prepareTimerAlerts, previewTimerSound, previewTimerVibration } from '@/lib/timerAlerts';
 import { AppDialog } from './AppDialog';
 import type { Settings } from '@/lib/game';
@@ -39,6 +41,14 @@ function TimerAlertToggle({ label, description, checked, disabled = false, onCha
 }
 
 function getNotificationStatus() {
+  if (Capacitor.isNativePlatform()) {
+    return {
+      disabled: false,
+      permission: 'native',
+      description: 'Показывать уведомление приложения.'
+    };
+  }
+
   if (typeof Notification === 'undefined') {
     return {
       disabled: true,
@@ -72,10 +82,11 @@ function getNotificationStatus() {
 
 export function TimerAlertSettingsDialog({ settings, onChange, onClose }: TimerAlertSettingsDialogProps) {
   const notificationStatus = getNotificationStatus();
+  const isNativeNotifications = notificationStatus.permission === 'native';
 
   function updateSound(checked: boolean) {
     if (checked) {
-      prepareTimerAlerts({ sound: true, vibration: false });
+      prepareTimerAlerts({ sound: true });
       previewTimerSound();
     }
     onChange({ timerSoundEnabled: checked });
@@ -83,7 +94,6 @@ export function TimerAlertSettingsDialog({ settings, onChange, onClose }: TimerA
 
   function updateVibration(checked: boolean) {
     if (checked) {
-      prepareTimerAlerts({ sound: false, vibration: true });
       previewTimerVibration();
     }
     onChange({ timerVibrationEnabled: checked });
@@ -92,6 +102,12 @@ export function TimerAlertSettingsDialog({ settings, onChange, onClose }: TimerA
   async function updateNotifications(checked: boolean) {
     if (!checked) {
       onChange({ timerNotificationEnabled: false });
+      return;
+    }
+
+    if (isNativeNotifications) {
+      const isGranted = await requestNativeTimerNotificationPermission();
+      onChange({ timerNotificationEnabled: isGranted });
       return;
     }
 
@@ -130,7 +146,7 @@ export function TimerAlertSettingsDialog({ settings, onChange, onClose }: TimerA
         <TimerAlertToggle
           label="Уведомления"
           description={notificationStatus.description}
-          checked={settings.timerNotificationEnabled && notificationStatus.permission === 'granted'}
+          checked={settings.timerNotificationEnabled && (isNativeNotifications || notificationStatus.permission === 'granted')}
           disabled={notificationStatus.disabled}
           onChange={updateNotifications}
         />

@@ -19,8 +19,7 @@ export default function PokerPointsPWA() {
   const { modal } = appModal;
 
   useBodyScrollLock(Boolean(modal));
-  const modalPlayer =
-    modal && 'playerId' in modal ? tournament.state.players.find((player) => player.id === modal.playerId) || null : null;
+  const modalPlayer = modal && 'playerId' in modal ? tournament.state.players.find((player) => player.id === modal.playerId) || null : null;
 
   function closeModal() {
     appModal.closeModal();
@@ -93,41 +92,43 @@ export default function PokerPointsPWA() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-gradient-to-b from-zinc-950 via-black to-black px-4 pb-24">
-        <AppHeader onReference={appModal.openReference} onReset={appModal.openResetTournament} />
+    <div className="fixed inset-0 overflow-hidden bg-black text-white">
+      <div className="mx-auto flex h-full w-full max-w-[430px] flex-col overflow-hidden bg-gradient-to-b from-zinc-950 via-black to-black px-4">
+        <div className="shrink-0">
+          <AppHeader onReference={appModal.openReference} onReset={appModal.openResetTournament} />
 
-        <TournamentControls
-          settings={tournament.state.settings}
-          onSettings={appModal.openSettings}
-          onAddPlayer={openAddPlayerDialog}
-        />
+          <TournamentControls settings={tournament.state.settings} onSettings={appModal.openSettings} onAddPlayer={openAddPlayerDialog} />
 
-        <PokerTimer
-          settings={tournament.state.settings}
-          timer={tournament.state.timer}
-          onToggle={tournament.toggleTimer}
-          onPreviousLevel={tournament.previousTimerLevel}
-          onNextLevel={tournament.nextTimerLevel}
-          onResetLevel={appModal.openResetTimer}
-          onSettings={appModal.openTimerSettings}
-          onAlertSettings={appModal.openTimerAlertSettings}
-        />
+          <PokerTimer
+            settings={tournament.state.settings}
+            timer={tournament.state.timer}
+            onToggle={tournament.toggleTimer}
+            onPreviousLevel={tournament.previousTimerLevel}
+            onNextLevel={tournament.nextTimerLevel}
+            onResetLevel={appModal.openResetTimer}
+            onSettings={appModal.openTimerSettings}
+            onAlertSettings={appModal.openTimerAlertSettings}
+          />
+        </div>
 
-        <PlayersList
-          players={tournament.state.players}
-          buyInPoints={tournament.state.settings.buyInPoints}
-          eliminatedPlaces={tournament.eliminatedPlaces}
-          onIncrementBuyIns={(playerId) => increment(playerId, 'buyIns')}
-          onDecrementBuyIns={(playerId) => requestDecrement(playerId, 'buyIns')}
-          onIncrementPaidEntries={(playerId) => increment(playerId, 'paidEntries')}
-          onDecrementPaidEntries={(playerId) => requestDecrement(playerId, 'paidEntries')}
-          onToggleEliminated={toggleEliminated}
-          onDelete={appModal.openDeletePlayer}
-        />
+        <div
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2 [scrollbar:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <PlayersList
+            players={tournament.state.players}
+            buyInPoints={tournament.state.settings.buyInPoints}
+            eliminatedPlaces={tournament.eliminatedPlaces}
+            onIncrementBuyIns={(playerId) => increment(playerId, 'buyIns')}
+            onDecrementBuyIns={(playerId) => requestDecrement(playerId, 'buyIns')}
+            onIncrementPaidEntries={(playerId) => increment(playerId, 'paidEntries')}
+            onDecrementPaidEntries={(playerId) => requestDecrement(playerId, 'paidEntries')}
+            onToggleEliminated={toggleEliminated}
+            onDelete={appModal.openDeletePlayer}
+          />
+        </div>
+
+        <FooterTotals totals={tournament.totals} onOpen={appModal.openTotals} />
       </div>
-
-      <FooterTotals totals={tournament.totals} onOpen={appModal.openTotals} />
 
       <AppModals
         modal={modal}

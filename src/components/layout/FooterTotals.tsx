@@ -30,11 +30,11 @@ type FooterTotalsProps = {
 
 export function FooterTotals({ totals, onOpen }: FooterTotalsProps) {
   return (
-    <footer className="fixed inset-x-0 bottom-0 z-40 flex justify-center bg-black/80 px-3 pb-2 pt-1 backdrop-blur-xl">
+    <footer className="-mx-4 shrink-0 bg-black/80 px-3 pb-[max(0.125rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-xl">
       <button
         type="button"
         onClick={onOpen}
-        className="mb-2 grid w-full max-w-[430px] grid-cols-3 gap-1.5 rounded-2xl bg-zinc-950 p-1.5 text-left shadow-2xl ring-1 ring-white/10 active:scale-[0.99]"
+        className="grid w-full grid-cols-3 gap-1.5 rounded-2xl bg-zinc-950 p-1.5 text-left shadow-2xl ring-1 ring-white/10 active:scale-[0.99]"
       >
         {footerMetrics.map((metric) => (
           <FooterStat

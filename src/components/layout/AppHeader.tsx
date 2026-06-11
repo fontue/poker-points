@@ -8,7 +8,7 @@ type AppHeaderProps = {
 
 export function AppHeader({ onReference, onReset }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-20 -mx-4 mb-4 bg-black/35 px-4 pb-3 pt-2 backdrop-blur-xl">
+    <header className="-mx-4 mb-4 bg-black/35 px-4 pb-3 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur-xl">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-violet-300">Poker points</p>

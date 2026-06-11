@@ -52,8 +52,7 @@ export function PokerTimer({
 
   function toggleTimer() {
     prepareTimerAlerts({
-      sound: settings.timerSoundEnabled,
-      vibration: settings.timerVibrationEnabled
+      sound: settings.timerSoundEnabled
     });
     onToggle();
   }

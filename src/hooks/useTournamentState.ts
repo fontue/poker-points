@@ -9,15 +9,38 @@ import {
 } from '@/lib/game';
 import type { PlayerCounterField, Settings } from '@/lib/game';
 import { loadState, saveState } from '@/lib/storage';
+import { syncNativeTimerLiveActivity } from '@/lib/nativeTimerLiveActivity';
+import { scheduleNativeTimerNotifications } from '@/lib/nativeTimerNotifications';
 import { triggerTimerLevelAlert } from '@/lib/timerAlerts';
 
 export function useTournamentState() {
   const [state, dispatch] = useReducer(tournamentReducer, undefined, loadState);
   const handledCompletedLevelRef = useRef<number | null>(null);
+  const isTimerAlertEffectInitializedRef = useRef(false);
 
   useEffect(() => {
     saveState(state);
   }, [state]);
+
+  useEffect(() => {
+    scheduleNativeTimerNotifications(state.settings, state.timer).catch(() => undefined);
+  }, [
+    state.settings.timerLevels,
+    state.settings.timerNotificationEnabled,
+    state.timer.currentLevelIndex,
+    state.timer.endsAt,
+    state.timer.isRunning
+  ]);
+
+  useEffect(() => {
+    syncNativeTimerLiveActivity(state.settings, state.timer).catch(() => undefined);
+  }, [
+    state.settings.timerLevels,
+    state.timer.currentLevelIndex,
+    state.timer.endsAt,
+    state.timer.isRunning,
+    state.timer.remainingSeconds
+  ]);
 
   useEffect(() => {
     if (!state.timer.isRunning) return;
@@ -45,6 +68,12 @@ export function useTournamentState() {
 
   useEffect(() => {
     const completedLevelIndex = state.timer.lastCompletedLevelIndex;
+    if (!isTimerAlertEffectInitializedRef.current) {
+      handledCompletedLevelRef.current = completedLevelIndex;
+      isTimerAlertEffectInitializedRef.current = true;
+      return;
+    }
+
     if (completedLevelIndex === null) {
       handledCompletedLevelRef.current = null;
       return;
