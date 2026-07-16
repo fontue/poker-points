@@ -211,7 +211,7 @@ struct NativePokerPointsView: View {
                     } label: {
                         Image(systemName: store.timer.isRunning ? "pause.fill" : "play.fill")
                             .font(.headline.weight(.semibold))
-                            .frame(width: 48, height: 32)
+                            .frame(width: 54, height: 38)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
@@ -360,7 +360,7 @@ struct NativePokerPointsView: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.headline.weight(.semibold))
-                .frame(width: 40, height: 32)
+                .frame(width: 44, height: 38)
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
