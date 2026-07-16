@@ -3,10 +3,43 @@ import Foundation
 struct NativePlayer: Identifiable, Codable, Equatable {
     var id = UUID()
     var name: String
-    var buyIns = 1
+    var earlyEntries = 0
+    var buyIns = 0
     var paidEntries = 0
     var isEliminated = false
     var eliminatedAt: Date?
+    var rebuyTimerRemainingSeconds: Int?
+
+    init(name: String) {
+        self.name = name
+    }
+
+    var totalEntries: Int {
+        earlyEntries + buyIns
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case earlyEntries
+        case buyIns
+        case paidEntries
+        case isEliminated
+        case eliminatedAt
+        case rebuyTimerRemainingSeconds
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        name = try container.decode(String.self, forKey: .name)
+        earlyEntries = try container.decodeIfPresent(Int.self, forKey: .earlyEntries) ?? 0
+        buyIns = try container.decodeIfPresent(Int.self, forKey: .buyIns) ?? 0
+        paidEntries = try container.decodeIfPresent(Int.self, forKey: .paidEntries) ?? 0
+        isEliminated = try container.decodeIfPresent(Bool.self, forKey: .isEliminated) ?? false
+        eliminatedAt = try container.decodeIfPresent(Date.self, forKey: .eliminatedAt)
+        rebuyTimerRemainingSeconds = try container.decodeIfPresent(Int.self, forKey: .rebuyTimerRemainingSeconds)
+    }
 }
 
 struct NativeTimerLevel: Codable, Equatable {
@@ -18,44 +51,50 @@ struct NativeTimerLevel: Codable, Equatable {
 }
 
 struct NativeSettings: Codable, Equatable {
-    var buyInPoints = 1
-    var buyInChips = 1
+    var buyInPoints = 500
+    var buyInChips = 20_000
+    var earlyEntryChips = 20_000
     var prizeAdjustmentPoints = 0
     var prizePlaces = 3
     var prizeDistribution = [60, 30, 10]
-    var prizeRoundingStep = 1
+    var prizeRoundingStep = 500
     var timerLevels = NativeSettings.defaultTimerLevels
     var timerSoundEnabled = true
-    var timerVibrationEnabled = true
     var timerNotificationEnabled = true
+    var rebuyTimerEnabled = false
+    var rebuyTimerIntervalSeconds = 900
 
     init() {}
 
     private enum CodingKeys: String, CodingKey {
         case buyInPoints
         case buyInChips
+        case earlyEntryChips
         case prizeAdjustmentPoints
         case prizePlaces
         case prizeDistribution
         case prizeRoundingStep
         case timerLevels
         case timerSoundEnabled
-        case timerVibrationEnabled
         case timerNotificationEnabled
+        case rebuyTimerEnabled
+        case rebuyTimerIntervalSeconds
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        buyInPoints = try container.decodeIfPresent(Int.self, forKey: .buyInPoints) ?? 1
-        buyInChips = try container.decodeIfPresent(Int.self, forKey: .buyInChips) ?? 1
+        buyInPoints = try container.decodeIfPresent(Int.self, forKey: .buyInPoints) ?? 500
+        buyInChips = try container.decodeIfPresent(Int.self, forKey: .buyInChips) ?? 20_000
+        earlyEntryChips = try container.decodeIfPresent(Int.self, forKey: .earlyEntryChips) ?? buyInChips
         prizeAdjustmentPoints = try container.decodeIfPresent(Int.self, forKey: .prizeAdjustmentPoints) ?? 0
         prizePlaces = try container.decodeIfPresent(Int.self, forKey: .prizePlaces) ?? 3
         prizeDistribution = try container.decodeIfPresent([Int].self, forKey: .prizeDistribution) ?? [60, 30, 10]
-        prizeRoundingStep = try container.decodeIfPresent(Int.self, forKey: .prizeRoundingStep) ?? 1
+        prizeRoundingStep = try container.decodeIfPresent(Int.self, forKey: .prizeRoundingStep) ?? 500
         timerLevels = try container.decodeIfPresent([NativeTimerLevel].self, forKey: .timerLevels) ?? NativeSettings.defaultTimerLevels
         timerSoundEnabled = try container.decodeIfPresent(Bool.self, forKey: .timerSoundEnabled) ?? true
-        timerVibrationEnabled = try container.decodeIfPresent(Bool.self, forKey: .timerVibrationEnabled) ?? true
         timerNotificationEnabled = try container.decodeIfPresent(Bool.self, forKey: .timerNotificationEnabled) ?? true
+        rebuyTimerEnabled = try container.decodeIfPresent(Bool.self, forKey: .rebuyTimerEnabled) ?? false
+        rebuyTimerIntervalSeconds = try container.decodeIfPresent(Int.self, forKey: .rebuyTimerIntervalSeconds) ?? 900
     }
 
     static let defaultTimerLevels: [NativeTimerLevel] = [

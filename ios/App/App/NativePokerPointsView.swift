@@ -14,8 +14,11 @@ enum NativeTheme {
     static let green = Color(red: 0.47, green: 0.78, blue: 0.61)
     static let cyan = Color(red: 0.48, green: 0.78, blue: 0.86)
     static let blue = Color(red: 0.50, green: 0.64, blue: 0.94)
+    static let yellow = Color(red: 0.96, green: 0.78, blue: 0.34)
     static let red = Color(red: 0.94, green: 0.45, blue: 0.48)
-    static let dialogBackground = backgroundTop
+    static let dialogBackground = Color(uiColor: .systemBackground)
+    static let mainSurface = Color(uiColor: .secondarySystemGroupedBackground)
+    static let mainControl = Color(uiColor: .tertiarySystemFill)
 }
 
 extension View {
@@ -27,22 +30,19 @@ extension View {
             self
         }
     }
+
 }
 
 struct NativePokerPointsView: View {
     @StateObject private var store = NativeTournamentStore()
     @State private var activeSheet: NativeSheet?
     @State private var confirmation: NativeConfirmation?
-    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    private let ticker = Timer.publish(every: 1, on: .main, in: .default).autoconnect()
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [NativeTheme.backgroundTop, NativeTheme.backgroundBottom],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            Color(uiColor: .systemBackground)
+                .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
@@ -55,14 +55,16 @@ struct NativePokerPointsView: View {
         }
         .preferredColorScheme(.dark)
         .onReceive(ticker) { _ in store.tick() }
+        .task {
+            try? await Task.sleep(for: .milliseconds(300))
+            store.activateExternalTimerServices()
+        }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
             case .addPlayer:
                 NativeAddPlayerSheet(store: store)
             case .settings:
                 NativeSettingsSheet(store: store)
-            case .timerSettings:
-                NativeTimerSettingsSheet(store: store)
             case .timerAlerts:
                 NativeTimerAlertSettingsSheet(store: store)
             case .reference:
@@ -83,38 +85,52 @@ struct NativePokerPointsView: View {
 
     private var header: some View {
         HStack {
-            Text("Poker points")
-                .font(.caption.weight(.black))
-                .tracking(3)
-                .foregroundStyle(NativeTheme.accent)
-                .textCase(.uppercase)
-            Spacer()
+            Text("Poker Points")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.primary)
+
             Button {
                 activeSheet = .reference
             } label: {
                 Image(systemName: "book.closed.fill")
-                    .font(.headline.weight(.black))
-                    .frame(width: 42, height: 34)
-                    .background(NativeTheme.surfaceStrong, in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(NativeTheme.border))
+                    .font(.subheadline.weight(.semibold))
+                    .frame(width: 30, height: 30)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(.white)
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .buttonBorderShape(.circle)
+            .tint(.primary)
+
+            Spacer()
+
+            Button {
+                activeSheet = .timerAlerts
+            } label: {
+                Image(systemName: "bell.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(width: 30, height: 30)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .buttonBorderShape(.circle)
+            .tint(.primary)
 
             Button {
                 confirmation = .resetTournament {
-                    store.resetTournament()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        store.resetTournament()
+                    }
                 }
             } label: {
                 Text("Сброс")
-                    .font(.subheadline.weight(.black))
-                    .padding(.horizontal, 14)
-                    .frame(height: 34)
-                    .background(NativeTheme.red.opacity(0.16), in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(NativeTheme.red.opacity(0.22)))
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .frame(height: 30)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(NativeTheme.red)
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .buttonBorderShape(.capsule)
+            .tint(NativeTheme.red)
         }
         .padding(.top, 10)
         .padding(.bottom, 14)
@@ -128,19 +144,19 @@ struct NativePokerPointsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Параметры")
-                            .font(.caption.weight(.bold))
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        Text("\(store.settings.buyInPoints) pts · \(store.settings.buyInChips) chips")
-                            .font(.headline.weight(.black))
-                            .foregroundStyle(.white)
+                        Text("\(store.settings.buyInPoints) pts · \(store.settings.earlyEntryChips) chips")
+                            .font(.headline.weight(.semibold))
+                            .foregroundStyle(.primary)
                     }
                     Spacer()
                     Image(systemName: "slider.horizontal.3")
                 }
-                .frame(height: 58)
-                .padding(14)
-                .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 22))
-                .overlay(RoundedRectangle(cornerRadius: 22).stroke(NativeTheme.border))
+                .frame(height: 42)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(NativeTheme.mainSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
 
@@ -148,16 +164,15 @@ struct NativePokerPointsView: View {
                 activeSheet = .addPlayer
             } label: {
                 Image(systemName: "person.badge.plus")
-                    .font(.title3.weight(.black))
-                    .frame(width: 58)
+                    .font(.title3.weight(.semibold))
+                    .frame(width: 54)
                     .frame(maxHeight: .infinity)
-                    .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 22))
-                    .overlay(RoundedRectangle(cornerRadius: 22).stroke(NativeTheme.border))
+                    .background(NativeTheme.mainSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
         }
-        .frame(height: 86)
-        .padding(.bottom, 12)
+        .frame(height: 62)
+        .padding(.bottom, 10)
     }
 
     private var timerCard: some View {
@@ -169,7 +184,7 @@ struct NativePokerPointsView: View {
                         Text("Уровень \(store.timer.currentLevelIndex + 1)")
                             .font(.caption.weight(.black))
                             .foregroundStyle(.secondary)
-                        Text("\(compact(level.smallBlind)) / \(compact(level.bigBlind)) / \(compact(level.ante))")
+                        Text(timerBlindsText(level))
                             .font(.title3.weight(.black))
                             .monospacedDigit()
                             .lineLimit(1)
@@ -195,43 +210,16 @@ struct NativePokerPointsView: View {
                         store.toggleTimer()
                     } label: {
                         Image(systemName: store.timer.isRunning ? "pause.fill" : "play.fill")
-                            .font(.headline.weight(.black))
-                            .frame(width: 54, height: 38)
+                            .font(.headline.weight(.semibold))
+                            .frame(width: 48, height: 32)
                     }
-                    .buttonStyle(.plain)
-                    .background(NativeTheme.accent.opacity(0.22), in: RoundedRectangle(cornerRadius: 14))
-                    .foregroundStyle(NativeTheme.accent)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .buttonBorderShape(.roundedRectangle(radius: 12))
+                    .tint(NativeTheme.accent)
 
                     timerControlButton("forward.fill") {
                         store.nextLevel()
-                    }
-
-                    Menu {
-                        Button {
-                            activeSheet = .timerSettings
-                        } label: {
-                            Label("Настройки таймера", systemImage: "gearshape.fill")
-                        }
-
-                        Button {
-                            activeSheet = .timerAlerts
-                        } label: {
-                            Label("Настройки уведомлений", systemImage: "bell.badge.fill")
-                        }
-
-                        Button(role: .destructive) {
-                            confirmation = .resetTimer {
-                                store.resetTimer()
-                            }
-                        } label: {
-                            Label("Сбросить таймер", systemImage: "arrow.counterclockwise")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle.fill")
-                            .font(.headline.weight(.black))
-                            .frame(width: 44, height: 38)
-                            .background(NativeTheme.surfaceStrong, in: RoundedRectangle(cornerRadius: 14))
-                            .foregroundStyle(.white)
                     }
 
                     Spacer(minLength: 6)
@@ -249,52 +237,80 @@ struct NativePokerPointsView: View {
                 }
             }
         .padding(14)
-        .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 28))
-        .overlay(RoundedRectangle(cornerRadius: 28).stroke(NativeTheme.border))
+        .background(NativeTheme.mainSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .padding(.bottom, 12)
     }
 
+    @ViewBuilder
     private var playersList: some View {
-        List {
-            ForEach(store.players) { player in
-                NativePlayerRow(
-                    store: store,
-                    player: player,
-                    place: store.eliminatedPlace(for: player),
-                    onDecrementBuyIn: {
-                        confirmation = .decrementBuyIn(player.name) {
-                            store.decrementBuyIn(player)
-                        }
-                    },
-                    onDecrementPaid: {
-                        confirmation = .decrementPaid(player.name) {
-                            store.decrementPaid(player)
-                        }
-                    },
-                    onToggleEliminated: {
-                        if player.isEliminated {
-                            confirmation = .returnPlayer(player.name) {
+        let placesByPlayer = store.eliminatedPlacesByPlayer
+
+        if store.players.isEmpty {
+            ContentUnavailableView {
+                Label("Нет игроков", systemImage: "person.2")
+            } description: {
+                Text("Добавьте первого игрока, чтобы начать игру.")
+            } actions: {
+                Button {
+                    activeSheet = .addPlayer
+                } label: {
+                    Label("Добавить игрока", systemImage: "person.badge.plus")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .tint(NativeTheme.accent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            List {
+                ForEach(store.players) { player in
+                    NativePlayerRow(
+                        store: store,
+                        player: player,
+                        place: placesByPlayer[player.id],
+                        buyInPoints: store.settings.buyInPoints,
+                        rebuyTimerEnabled: store.settings.rebuyTimerEnabled,
+                        onDecrementEarlyEntry: {
+                            confirmation = .decrementEarlyEntry(player.name) {
+                                store.decrementEarlyEntry(player)
+                            }
+                        },
+                        onDecrementBuyIn: {
+                            confirmation = .decrementBuyIn(player.name) {
+                                store.decrementBuyIn(player)
+                            }
+                        },
+                        onDecrementPaid: {
+                            confirmation = .decrementPaid(player.name) {
+                                store.decrementPaid(player)
+                            }
+                        },
+                        onToggleEliminated: {
+                            if player.isEliminated {
+                                confirmation = .returnPlayer(player.name) {
+                                    store.toggleEliminated(player)
+                                }
+                            } else {
                                 store.toggleEliminated(player)
                             }
-                        } else {
-                            store.toggleEliminated(player)
+                        },
+                        onDelete: {
+                            confirmation = .deletePlayer(player.name) {
+                                store.delete(player)
+                            }
                         }
-                    },
-                    onDelete: {
-                        confirmation = .deletePlayer(player.name) {
-                            store.delete(player)
-                        }
-                    }
-                )
-                .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
+                    )
+                    .equatable()
+                    .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
             }
+            .listStyle(.plain)
+            .background(Color.clear)
+            .scrollContentBackgroundHiddenIfAvailable()
+            .frame(maxHeight: .infinity)
         }
-        .listStyle(.plain)
-        .background(Color.clear)
-        .scrollContentBackgroundHiddenIfAvailable()
-        .frame(maxHeight: .infinity)
     }
 
     private var footer: some View {
@@ -306,9 +322,8 @@ struct NativePokerPointsView: View {
                 NativeMetric(label: "Оплачено", value: store.pointsPaid, color: NativeTheme.orange)
                 NativeMetric(label: "Фишки", value: store.chipsInGame, color: NativeTheme.cyan)
             }
-            .padding(6)
-            .background(Color.black.opacity(0.52), in: RoundedRectangle(cornerRadius: 22))
-            .overlay(RoundedRectangle(cornerRadius: 22).stroke(NativeTheme.border))
+            .padding(8)
+            .background(NativeTheme.mainSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
         .padding(.top, 4)
@@ -319,6 +334,12 @@ struct NativePokerPointsView: View {
         guard value >= 1000 else { return "\(value)" }
         let thousands = Double(value) / 1000
         return thousands.rounded() == thousands ? "\(Int(thousands))k" : String(format: "%.1fk", thousands)
+    }
+
+    private func timerBlindsText(_ level: NativeTimerLevel) -> String {
+        let blinds = "\(compact(level.smallBlind)) / \(compact(level.bigBlind))"
+        guard level.ante > 0 else { return blinds }
+        return "\(blinds) / \(compact(level.ante))"
     }
 
     private func formatTime(_ seconds: Int) -> String {
@@ -338,36 +359,50 @@ struct NativePokerPointsView: View {
     private func timerControlButton(_ systemName: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.headline.weight(.black))
-                .frame(width: 44, height: 38)
+                .font(.headline.weight(.semibold))
+                .frame(width: 40, height: 32)
         }
-        .buttonStyle(.plain)
-        .background(NativeTheme.surfaceStrong, in: RoundedRectangle(cornerRadius: 14))
-        .foregroundStyle(.white)
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .buttonBorderShape(.roundedRectangle(radius: 12))
+        .tint(.primary)
     }
 
 }
 
-struct NativePlayerRow: View {
-    @ObservedObject var store: NativeTournamentStore
+struct NativePlayerRow: View, Equatable {
+    let store: NativeTournamentStore
     let player: NativePlayer
     let place: Int?
+    let buyInPoints: Int
+    let rebuyTimerEnabled: Bool
+    let onDecrementEarlyEntry: () -> Void
     let onDecrementBuyIn: () -> Void
     let onDecrementPaid: () -> Void
     let onToggleEliminated: () -> Void
     let onDelete: () -> Void
 
+    static func == (lhs: NativePlayerRow, rhs: NativePlayerRow) -> Bool {
+        lhs.player == rhs.player
+            && lhs.place == rhs.place
+            && lhs.buyInPoints == rhs.buyInPoints
+            && lhs.rebuyTimerEnabled == rhs.rebuyTimerEnabled
+    }
+
     var body: some View {
         VStack(spacing: 10) {
             HStack {
-                Text(player.name)
+                Text(playerNameText)
                     .font(.headline.weight(.black))
                     .strikethrough(player.isEliminated)
-                    .foregroundStyle(player.isEliminated ? NativeTheme.red : .white)
+                    .foregroundStyle(playerNameColor)
                 if let medal = medalText {
                     Text(medal)
                         .font(.headline)
                 }
+                Text("• \(player.earlyEntries)")
+                    .font(.headline.weight(.black))
+                    .foregroundStyle(NativeTheme.green)
                 Text("• \(player.buyIns)")
                     .font(.headline.weight(.black))
                     .foregroundStyle(NativeTheme.accent)
@@ -377,29 +412,45 @@ struct NativePlayerRow: View {
                 Spacer()
                 Text(paymentStatusText)
                     .font(.caption2.weight(.black))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background((player.paidEntries >= player.buyIns ? NativeTheme.green : NativeTheme.orange).opacity(0.18), in: Capsule())
-                    .foregroundStyle(player.paidEntries >= player.buyIns ? NativeTheme.green : NativeTheme.orange)
+                    .background((player.paidEntries >= player.totalEntries ? NativeTheme.green : NativeTheme.orange).opacity(0.18), in: Capsule())
+                    .foregroundStyle(player.paidEntries >= player.totalEntries ? NativeTheme.green : NativeTheme.orange)
             }
 
             HStack(spacing: 8) {
-                action("plus.circle.fill", color: NativeTheme.accent.opacity(0.42)) {
+                action("door.left.hand.open", color: NativeTheme.green) {
+                    playAddHaptic()
+                    store.incrementEarlyEntry(player)
+                }
+                .disabled(player.totalEntries > 0)
+                .opacity(player.totalEntries > 0 ? 0.4 : 1)
+
+                action("plus.circle.fill", color: NativeTheme.accent) {
                     playAddHaptic()
                     store.incrementBuyIn(player)
                 }
-                action("creditcard.fill", color: NativeTheme.orange.opacity(0.42)) {
+                action("creditcard.fill", color: NativeTheme.orange) {
                     playAddHaptic()
                     store.incrementPaid(player)
                 }
+                .disabled(player.paidEntries >= player.totalEntries)
+                .opacity(player.paidEntries >= player.totalEntries ? 0.4 : 1)
             }
         }
         .padding(12)
-        .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 24))
-        .overlay(RoundedRectangle(cornerRadius: 24).stroke(NativeTheme.border))
+        .background(NativeTheme.mainSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .swipeActions(edge: .leading, allowsFullSwipe: false) {
+            Button(action: onDecrementEarlyEntry) {
+                Label("Бай-ин", systemImage: "door.left.hand.closed")
+            }
+            .tint(NativeTheme.green)
+            .disabled(player.earlyEntries <= 0)
+
             Button(action: onDecrementBuyIn) {
-                Label("Бай-ин", systemImage: "minus.circle")
+                Label("Ребай", systemImage: "minus.circle")
             }
             .tint(NativeTheme.accent)
             .disabled(player.buyIns <= 0)
@@ -424,9 +475,30 @@ struct NativePlayerRow: View {
     }
 
     private var paymentStatusText: String {
-        let debtEntries = max(0, player.buyIns - player.paidEntries)
+        let debtEntries = max(0, player.totalEntries - player.paidEntries)
         guard debtEntries > 0 else { return "Оплачено" }
-        return "Не оплачено \(debtEntries * store.settings.buyInPoints)"
+        return "Не оплачено \(debtEntries * buyInPoints)"
+    }
+
+    private var playerNameText: String {
+        guard rebuyTimerEnabled,
+              let remaining = player.rebuyTimerRemainingSeconds,
+              remaining > 0 else {
+            return player.name
+        }
+        return "\(player.name) (\(formatRebuyTime(remaining)))"
+    }
+
+    private var playerNameColor: Color {
+        if player.isEliminated {
+            return NativeTheme.red
+        }
+        if rebuyTimerEnabled,
+           let remaining = player.rebuyTimerRemainingSeconds,
+           remaining > 0 {
+            return NativeTheme.yellow
+        }
+        return .white
     }
 
     private var medalText: String? {
@@ -441,16 +513,22 @@ struct NativePlayerRow: View {
     private func action(_ systemName: String, color: Color, perform: @escaping () -> Void) -> some View {
         Button(action: perform) {
             Image(systemName: systemName)
-                .font(.headline.weight(.black))
+                .font(.headline.weight(.semibold))
                 .frame(maxWidth: .infinity)
-                .frame(height: 34)
-                .background(color, in: RoundedRectangle(cornerRadius: 14))
+                .frame(height: 28)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .buttonBorderShape(.roundedRectangle(radius: 12))
+        .tint(color)
     }
 
     private func playAddHaptic() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
+
+    private func formatRebuyTime(_ seconds: Int) -> String {
+        String(format: "%02d:%02d", max(0, seconds) / 60, max(0, seconds) % 60)
     }
 }
 
@@ -472,108 +550,170 @@ struct NativeMetric: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
 struct NativeAddPlayerSheet: View {
-    @ObservedObject var store: NativeTournamentStore
-    @State private var name = ""
+    let store: NativeTournamentStore
+    @State private var history: [String]
+    @State private var playerNames: Set<String>
+    @State private var newPlayerName = ""
+    @State private var showAddPlayerPrompt = false
+
+    init(store: NativeTournamentStore) {
+        self.store = store
+        _history = State(initialValue: store.playerNameHistory)
+        _playerNames = State(initialValue: Set(store.players.map { $0.name.lowercased() }))
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Добавить игрока")
-                .font(.title2.weight(.black))
-            TextField("Имя", text: $name)
-                .textInputAutocapitalization(.words)
-                .font(.title3.weight(.bold))
-                .padding(14)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
-                .onSubmit(addCurrentName)
-
-            if !store.playerNameHistory.isEmpty {
-                Text("История имен")
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-
-                ScrollView {
-                    LazyVStack(spacing: 8) {
-                        ForEach(sortedHistory, id: \.self) { historyName in
-                            historyRow(historyName)
+        NavigationStack {
+            Group {
+                if history.isEmpty {
+                    ContentUnavailableView(
+                        "История пуста",
+                        systemImage: "person.crop.circle.badge.plus",
+                        description: Text("Введите имя первого игрока")
+                    )
+                } else {
+                    List {
+                        ForEach(historySectionTitles, id: \.self) { title in
+                            Section(title) {
+                                ForEach(historyNames(in: title), id: \.self) { historyName in
+                                    historyRow(historyName)
+                                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                            Button(role: .destructive) {
+                                                deleteHistoryName(historyName)
+                                            } label: {
+                                                Image(systemName: "trash")
+                                            }
+                                            .tint(.red)
+                                        }
+                                }
+                            }
                         }
                     }
-                    .padding(.bottom, 6)
+                    .listStyle(.insetGrouped)
+                }
+            }
+            .navigationTitle("Добавить игрока")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        newPlayerName = ""
+                        showAddPlayerPrompt = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .tint(NativeTheme.accent)
+                    .accessibilityLabel("Добавить нового игрока")
                 }
             }
         }
-        .padding(20)
-        .background(NativeTheme.dialogBackground.ignoresSafeArea())
+        .alert("Новый игрок", isPresented: $showAddPlayerPrompt) {
+            TextField("Имя игрока", text: $newPlayerName)
+                .textInputAutocapitalization(.words)
+                .autocorrectionDisabled()
+                .onSubmit(submitNewPlayer)
+
+            Button("Добавить", action: submitNewPlayer)
+                .disabled(newPlayerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            Button("Отмена", role: .cancel) {
+                newPlayerName = ""
+            }
+        } message: {
+            Text("Введите имя игрока, которого нужно добавить в игру.")
+        }
+        .presentationDetents([.fraction(0.67)])
+        .presentationDragIndicator(.visible)
+        .presentationContentInteraction(.scrolls)
     }
 
     private var sortedHistory: [String] {
-        store.playerNameHistory.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        history.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+    }
+
+    private var historySectionTitles: [String] {
+        Array(Set(sortedHistory.map { historySectionTitle(for: $0) }))
+            .sorted { lhs, rhs in
+                if lhs == "#" { return false }
+                if rhs == "#" { return true }
+                return lhs.localizedCaseInsensitiveCompare(rhs) == .orderedAscending
+            }
+    }
+
+    private func historyNames(in section: String) -> [String] {
+        sortedHistory.filter { historySectionTitle(for: $0) == section }
+    }
+
+    private func historySectionTitle(for name: String) -> String {
+        guard let character = name.trimmingCharacters(in: .whitespacesAndNewlines).first,
+              let scalar = character.unicodeScalars.first,
+              CharacterSet.letters.contains(scalar) else {
+            return "#"
+        }
+        return String(character).uppercased(with: .current)
     }
 
     private func historyRow(_ historyName: String) -> some View {
-        let isAdded = store.players.contains { $0.name.caseInsensitiveCompare(historyName) == .orderedSame }
+        let isAdded = playerNames.contains(historyName.lowercased())
 
-        return HStack(spacing: 10) {
-            Button {
-                if !isAdded {
-                    store.addPlayer(name: historyName)
-                }
-            } label: {
+        return Button {
+            if !isAdded {
+                _ = addPlayer(historyName)
+            }
+        } label: {
+            HStack(spacing: 12) {
                 Text(historyName)
                     .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-            .disabled(isAdded)
+                    .font(.body)
+                    .foregroundStyle(.primary)
 
-            if isAdded {
-                Text("В игре")
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(NativeTheme.accent)
-                    .textCase(.uppercase)
-            }
+                Spacer(minLength: 8)
 
-            Button {
-                store.deleteHistoryName(historyName)
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.caption.weight(.black))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 28, height: 28)
+                if isAdded {
+                    Text("В игре")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(NativeTheme.accent)
+                }
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(NativeTheme.border))
+        .buttonStyle(.plain)
     }
 
-    private func canAddName(_ value: String) -> Bool {
+    private func deleteHistoryName(_ historyName: String) {
+        store.deleteHistoryName(historyName)
+        history.removeAll { $0.caseInsensitiveCompare(historyName) == .orderedSame }
+    }
+
+    @discardableResult
+    private func addPlayer(_ value: String) -> Bool {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
-        return !store.players.contains { $0.name.caseInsensitiveCompare(trimmed) == .orderedSame }
+        store.addPlayer(name: trimmed)
+        playerNames.insert(trimmed.lowercased())
+        history = store.playerNameHistory
+        return true
     }
 
-    private func addCurrentName() {
-        guard canAddName(name) else { return }
-        store.addPlayer(name: name)
-        name = ""
+    private func submitNewPlayer() {
+        guard addPlayer(newPlayerName) else { return }
+        newPlayerName = ""
+        showAddPlayerPrompt = false
     }
 }
 
 struct NativeSettingsSheet: View {
     @ObservedObject var store: NativeTournamentStore
-    @Environment(\.dismiss) private var dismiss
     @State private var settings: NativeSettings
     @State private var showDistributionInfo = false
+    @State private var showTimerSettings = false
+    @State private var showRebuyTimerSettings = false
+    @State private var showTimerResetConfirmation = false
+    @State private var activeNumberPicker: NativeSettingsPickerField?
     @State private var prizeMode: NativePrizeMode
 
     init(store: NativeTournamentStore) {
@@ -584,33 +724,71 @@ struct NativeSettingsSheet: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section("Игра") {
-                    NativeNumberField(title: "Цена бай-ина", value: $settings.buyInPoints, placeholder: "1", minimum: 1)
-                    NativeNumberField(title: "Фишек за бай-ин", value: $settings.buyInChips, placeholder: "1", minimum: 1)
-                    NativeNumberField(title: "Корректировка фонда", value: $settings.prizeAdjustmentPoints, placeholder: "0", minimum: nil)
+                    pickerRow(.buyInPoints, value: settings.buyInPoints)
+                    pickerRow(.earlyEntryChips, value: settings.earlyEntryChips)
+                    pickerRow(.buyInChips, value: settings.buyInChips)
+                    pickerRow(.prizeAdjustment, value: settings.prizeAdjustmentPoints)
+
+                }
+
+                Section("Таймер") {
+                    Button {
+                        showRebuyTimerSettings = true
+                    } label: {
+                        settingsLinkRow(
+                            title: "Таймер ребаев",
+                            systemImage: "repeat.circle.fill",
+                            detail: store.settings.rebuyTimerEnabled ? "Включен" : "Выключен"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        showTimerSettings = true
+                    } label: {
+                        settingsLinkRow(
+                            title: "Настройки таймера",
+                            systemImage: "timer",
+                            detail: "\(store.settings.timerLevels.count) уровней"
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(role: .destructive) {
+                        showTimerResetConfirmation = true
+                    } label: {
+                        Label("Сбросить таймер", systemImage: "arrow.counterclockwise")
+                            .foregroundStyle(NativeTheme.red)
+                    }
                 }
 
                 Section("Призы") {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
-                        presetButton(.onePlace)
-                        presetButton(.twoPlaces)
-                        presetButton(.threePlaces)
-                        presetButton(.custom)
+                    Picker("Количество призовых мест", selection: $prizeMode) {
+                        ForEach(NativePrizeMode.allCases, id: \.self) { mode in
+                            Text(mode.title)
+                                .tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: prizeMode) { _, mode in
+                        applyPrizeMode(mode)
                     }
 
                     if prizeMode == .custom {
-                        NativeNumberField(title: "Количество призовых мест", value: prizePlacesBinding, placeholder: "1", minimum: 1)
+                        pickerRow(.prizePlaces, value: settings.prizePlaces)
                     }
 
-                    NativeNumberField(title: "Шаг округления призовых", value: $settings.prizeRoundingStep, placeholder: "1", minimum: 1)
+                    pickerRow(.prizeRoundingStep, value: settings.prizeRoundingStep)
 
                     if isPrizeDistributionValid {
                         Button {
                             showDistributionInfo = true
                         } label: {
-                            Label("Показать расчет по шагам", systemImage: "info.circle.fill")
+                            Label("Расчет по шагам", systemImage: "info.circle")
+                                .foregroundStyle(NativeTheme.accent)
                         }
                     }
                 }
@@ -619,53 +797,61 @@ struct NativeSettingsSheet: View {
                     if prizeMode == .custom {
                         prizeDistributionEditor
                     } else {
-                        HStack {
-                            Text("Текущий пресет")
-                                .foregroundStyle(.secondary)
-                            Spacer()
+                        LabeledContent("Распределение") {
                             Text(normalizedDistribution.map(String.init).joined(separator: "/") + "%")
-                                .font(.body.weight(.black))
                                 .monospacedDigit()
+                                .foregroundStyle(.secondary)
                         }
                     }
 
                     if !prizeValidationMessages.isEmpty {
                         ForEach(prizeValidationMessages, id: \.self) { message in
                             Text(message)
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(NativeTheme.red)
+                                .font(.footnote)
+                                .foregroundStyle(.red)
                         }
                     }
                 }
             }
             .navigationTitle("Параметры")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Готово") {
-                        normalizeBeforeSave()
-                        if isPrizeDistributionValid {
-                            store.updateSettings(settings)
-                            dismiss()
-                        }
-                    }
-                    .disabled(!isPrizeDistributionValid)
-                }
+            .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: settings) { _, nextSettings in
+                store.updateGameSettings(nextSettings)
             }
         }
         .sheet(isPresented: $showDistributionInfo) {
-            NativePrizeDistributionInfoSheet(settings: settings, prizePoints: store.prizePoints)
+            NativePrizeDistributionInfoSheet(settings: settings)
         }
-        .background(NativeTheme.dialogBackground.ignoresSafeArea())
+        .sheet(item: $activeNumberPicker) { field in
+            NativeNumberPickerSheet(
+                title: field.title,
+                value: pickerBinding(for: field),
+                minimum: field.minimum,
+                maximum: field.maximum,
+                step: field.step
+            )
+        }
+        .sheet(isPresented: $showRebuyTimerSettings) {
+            NativeRebuyTimerSettingsSheet(store: store)
+        }
+        .sheet(isPresented: $showTimerSettings) {
+            NativeTimerSettingsSheet(store: store)
+        }
+        .alert("Сбросить таймер?", isPresented: $showTimerResetConfirmation) {
+            Button("Сбросить", role: .destructive) {
+                store.resetTimer()
+            }
+            Button("Отмена", role: .cancel) {}
+        } message: {
+            Text("Таймер остановится, вернется на первый уровень и выставит полное время первого уровня.")
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 
     private var prizeDistributionEditor: some View {
         ForEach(0..<settings.prizePlaces, id: \.self) { index in
-            NativeNumberField(
-                title: "\(index + 1) место, %",
-                value: prizePercentBinding(at: index),
-                placeholder: "0",
-                minimum: 0
-            )
+            pickerRow(.prizePercent(index), value: prizePercent(at: index))
         }
     }
 
@@ -723,29 +909,67 @@ struct NativeSettingsSheet: View {
         }
     }
 
-    private func presetButton(_ mode: NativePrizeMode) -> some View {
+    private func pickerRow(_ field: NativeSettingsPickerField, value: Int) -> some View {
         Button {
-            prizeMode = mode
-            if let distribution = mode.distribution {
-                settings.prizePlaces = distribution.count
-                settings.prizeDistribution = distribution
-            } else {
-                resizePrizeDistribution()
-            }
+            activeNumberPicker = field
         } label: {
-            VStack(spacing: 2) {
-                Text(mode.title)
-                    .font(.caption.weight(.black))
-                Text(mode.subtitle)
-                    .font(.caption2.weight(.bold))
+            HStack(spacing: 8) {
+                Text(field.title)
+                    .foregroundStyle(.primary)
+                Spacer(minLength: 8)
+                Text(value.formatted())
+                    .monospacedDigit()
                     .foregroundStyle(.secondary)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(prizeMode == mode ? NativeTheme.accentSoft : NativeTheme.surfaceStrong, in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(prizeMode == mode ? NativeTheme.accent.opacity(0.35) : NativeTheme.border))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    private func settingsLinkRow(title: String, systemImage: String, detail: String) -> some View {
+        HStack(spacing: 10) {
+            Label(title, systemImage: systemImage)
+                .foregroundStyle(.primary)
+            Spacer(minLength: 8)
+            Text(detail)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
+        }
+        .contentShape(Rectangle())
+    }
+
+    private func pickerBinding(for field: NativeSettingsPickerField) -> Binding<Int> {
+        switch field {
+        case .buyInPoints:
+            return $settings.buyInPoints
+        case .earlyEntryChips:
+            return $settings.earlyEntryChips
+        case .buyInChips:
+            return $settings.buyInChips
+        case .prizeAdjustment:
+            return $settings.prizeAdjustmentPoints
+        case .prizeRoundingStep:
+            return $settings.prizeRoundingStep
+        case .prizePlaces:
+            return prizePlacesBinding
+        case .prizePercent(let index):
+            return prizePercentBinding(at: index)
+        }
+    }
+
+    private func applyPrizeMode(_ mode: NativePrizeMode) {
+        if let distribution = mode.distribution {
+            settings.prizePlaces = distribution.count
+            settings.prizeDistribution = distribution
+        } else {
+            resizePrizeDistribution()
+        }
     }
 
     private func resizePrizeDistribution() {
@@ -755,16 +979,180 @@ struct NativeSettingsSheet: View {
         }
     }
 
-    private func normalizeBeforeSave() {
-        settings.buyInPoints = max(1, settings.buyInPoints)
-        settings.buyInChips = max(1, settings.buyInChips)
-        settings.prizePlaces = max(1, min(20, settings.prizePlaces))
-        settings.prizeRoundingStep = max(1, settings.prizeRoundingStep)
-        resizePrizeDistribution()
+}
+
+enum NativeSettingsPickerField: Identifiable {
+    case buyInPoints
+    case earlyEntryChips
+    case buyInChips
+    case prizeAdjustment
+    case prizeRoundingStep
+    case prizePlaces
+    case prizePercent(Int)
+
+    var id: String {
+        switch self {
+        case .buyInPoints: return "buy-in-points"
+        case .earlyEntryChips: return "early-entry-chips"
+        case .buyInChips: return "buy-in-chips"
+        case .prizeAdjustment: return "prize-adjustment"
+        case .prizeRoundingStep: return "prize-rounding-step"
+        case .prizePlaces: return "prize-places"
+        case .prizePercent(let index): return "prize-percent-\(index)"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .buyInPoints: return "Цена"
+        case .earlyEntryChips: return "Фишек за бай-ин"
+        case .buyInChips: return "Фишек за ребай"
+        case .prizeAdjustment: return "Корректировка фонда"
+        case .prizeRoundingStep: return "Шаг округления призовых"
+        case .prizePlaces: return "Количество призовых мест"
+        case .prizePercent(let index): return "\(index + 1) место, %"
+        }
+    }
+
+    var minimum: Int? {
+        switch self {
+        case .buyInPoints: return 100
+        case .earlyEntryChips: return 5_000
+        case .buyInChips: return 5_000
+        case .prizeAdjustment: return nil
+        case .prizeRoundingStep: return 100
+        case .prizePlaces: return 1
+        case .prizePercent: return 0
+        }
+    }
+
+    var maximum: Int? {
+        switch self {
+        case .prizePlaces: return 20
+        case .prizePercent: return 100
+        default: return nil
+        }
+    }
+
+    var step: Int {
+        switch self {
+        case .buyInPoints, .prizeAdjustment, .prizeRoundingStep: return 100
+        case .earlyEntryChips, .buyInChips: return 5_000
+        case .prizePlaces: return 1
+        case .prizePercent: return 5
+        }
     }
 }
 
-enum NativePrizeMode: Hashable {
+struct NativeNumberPickerSheet: View {
+    let title: String
+    @Binding var value: Int
+    let minimum: Int?
+    let maximum: Int?
+    let step: Int
+
+    var body: some View {
+        NavigationStack {
+            NativeInfiniteStepPicker(value: $value, minimum: minimum, maximum: maximum, step: step)
+                .frame(height: 240)
+                .padding(.horizontal, 20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.height(340)])
+        .presentationDragIndicator(.visible)
+        .presentationContentInteraction(.scrolls)
+    }
+}
+
+struct NativeInfiniteStepPicker: UIViewRepresentable {
+    @Binding var value: Int
+    let minimum: Int?
+    let maximum: Int?
+    let step: Int
+
+    private let unboundedRowCount = 100_001
+
+    func makeUIView(context: Context) -> UIPickerView {
+        let picker = UIPickerView()
+        picker.dataSource = context.coordinator
+        picker.delegate = context.coordinator
+        picker.backgroundColor = .clear
+        picker.selectRow(row(for: value), inComponent: 0, animated: false)
+        return picker
+    }
+
+    func updateUIView(_ picker: UIPickerView, context: Context) {
+        context.coordinator.parent = self
+        let targetRow = row(for: value)
+        if picker.selectedRow(inComponent: 0) != targetRow {
+            picker.selectRow(targetRow, inComponent: 0, animated: false)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+
+    private func row(for value: Int) -> Int {
+        if let minimum {
+            let rawRow = Int((Double(value - minimum) / Double(step)).rounded())
+            return min(rowCount - 1, max(0, rawRow))
+        }
+
+        let offset = Int((Double(value) / Double(step)).rounded())
+        return min(rowCount - 1, max(0, rowCount / 2 + offset))
+    }
+
+    private var rowCount: Int {
+        guard let minimum, let maximum else { return unboundedRowCount }
+        return max(1, (maximum - minimum) / step + 1)
+    }
+
+    private func value(for row: Int) -> Int {
+        if let minimum {
+            return minimum + row * step
+        }
+        return (row - rowCount / 2) * step
+    }
+
+    final class Coordinator: NSObject, UIPickerViewDataSource, UIPickerViewDelegate {
+        var parent: NativeInfiniteStepPicker
+
+        init(parent: NativeInfiniteStepPicker) {
+            self.parent = parent
+        }
+
+        func numberOfComponents(in pickerView: UIPickerView) -> Int {
+            1
+        }
+
+        func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+            parent.rowCount
+        }
+
+        func pickerView(
+            _ pickerView: UIPickerView,
+            viewForRow row: Int,
+            forComponent component: Int,
+            reusing view: UIView?
+        ) -> UIView {
+            let label = (view as? UILabel) ?? UILabel()
+            label.text = String(parent.value(for: row))
+            label.textAlignment = .center
+            label.textColor = .label
+            label.font = .monospacedDigitSystemFont(ofSize: 22, weight: .semibold)
+            return label
+        }
+
+        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+            parent.value = parent.value(for: row)
+        }
+    }
+}
+
+enum NativePrizeMode: Hashable, CaseIterable {
     case onePlace
     case twoPlaces
     case threePlaces
@@ -877,7 +1265,9 @@ struct NativeEndCursorTextField: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextField {
         let textField = NativeEndCursorUITextField()
         textField.delegate = context.coordinator
-        textField.keyboardType = keyboardType
+        if textField.keyboardType != keyboardType {
+            textField.keyboardType = keyboardType
+        }
         textField.textAlignment = .right
         textField.textColor = .white
         textField.tintColor = UIColor(NativeTheme.accent)
@@ -895,7 +1285,9 @@ struct NativeEndCursorTextField: UIViewRepresentable {
         if textField.text != text {
             textField.text = text
         }
-        textField.keyboardType = keyboardType
+        if textField.keyboardType != keyboardType {
+            textField.keyboardType = keyboardType
+        }
         if textField.isFirstResponder {
             context.coordinator.moveCursorToEnd(textField)
         }
@@ -938,51 +1330,32 @@ final class NativeEndCursorUITextField: UITextField {
 }
 
 struct NativePrizeDistributionInfoSheet: View {
-    @Environment(\.dismiss) private var dismiss
     let settings: NativeSettings
-    let prizePoints: Int
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Расчет показывает, как будет округляться распределение при текущем шаге призовых.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    VStack(spacing: 0) {
-                        HStack {
-                            Text("Фонд")
-                                .frame(width: 66, alignment: .leading)
-                            Text("Выплаты")
-                            Spacer()
-                        }
-                        .font(.caption.weight(.black))
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                        .padding(.horizontal, 14)
-                        .padding(.top, 12)
-                        .padding(.bottom, 8)
-
-                        ForEach(rows, id: \.fund) { row in
-                            Divider()
-                                .background(NativeTheme.border)
-                            NativePrizeDistributionInfoRowView(row: row)
-                        }
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(rows, id: \.fund) { row in
+                        NativePrizeDistributionInfoRowView(row: row)
                     }
-                    .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 20))
-                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(NativeTheme.border))
+                } header: {
+                    HStack(spacing: 12) {
+                        Text("Фонд")
+                            .frame(width: 72, alignment: .leading)
+                        Text("Выплаты")
+                    }
+                } footer: {
+                    Text("Расчет для 20 последовательных шагов округления призовых.")
                 }
-                .padding(20)
             }
+            .listStyle(.insetGrouped)
             .navigationTitle("Распределение")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Закрыть") { dismiss() }
-                }
-            }
-            .background(NativeTheme.dialogBackground.ignoresSafeArea())
+            .navigationBarTitleDisplayMode(.inline)
         }
+        .presentationDetents([.fraction(0.5)])
+        .presentationDragIndicator(.visible)
+        .presentationContentInteraction(.scrolls)
     }
 
     private var rows: [NativePrizeDistributionInfoRow] {
@@ -1020,59 +1393,42 @@ struct NativePrizeDistributionInfoSheet: View {
         }
     }
 
-    private func formatDecimal(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 1
-        return formatter.string(from: NSNumber(value: value)) ?? "0"
-    }
 }
 
 struct NativePrizeDistributionInfoRowView: View {
     let row: NativePrizeDistributionInfoRow
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Фонд")
-                    .font(.caption2.weight(.black))
-                    .foregroundStyle(.secondary)
-                Text("\(row.fund)")
-                    .font(.subheadline.weight(.black))
-                    .monospacedDigit()
-                    .foregroundStyle(NativeTheme.green)
-            }
-            .frame(width: 66, alignment: .leading)
+        HStack(alignment: .top, spacing: 12) {
+            Text(row.fund.formatted())
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(NativeTheme.green)
+                .frame(width: 72, alignment: .leading)
 
-            VStack(spacing: 6) {
+            VStack(spacing: 5) {
                 ForEach(row.payouts, id: \.place) { payout in
                     HStack(spacing: 8) {
                         Text("\(payout.place) место")
-                            .font(.subheadline.weight(.semibold))
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
-                            .frame(width: 62, alignment: .leading)
 
                         Spacer(minLength: 8)
 
-                        Text("\(payout.amount)")
-                            .font(.subheadline.weight(.black))
+                        Text(payout.amount.formatted())
+                            .font(.subheadline)
                             .monospacedDigit()
                             .foregroundStyle(.white)
 
                         Text("\(formatDecimal(payout.percent))%")
-                            .font(.caption.weight(.bold))
+                            .font(.caption)
                             .monospacedDigit()
                             .foregroundStyle(NativeTheme.accent)
-                            .frame(width: 48, alignment: .trailing)
+                            .frame(width: 44, alignment: .trailing)
                     }
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .background(NativeTheme.surfaceStrong, in: RoundedRectangle(cornerRadius: 14))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
     }
 
     private func formatDecimal(_ value: Double) -> String {
@@ -1096,55 +1452,87 @@ struct NativePrizeDistributionInfoPayout {
 
 struct NativeInfoSheet: View {
     @ObservedObject var store: NativeTournamentStore
+    @State private var measuredContentHeight: CGFloat = 450
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Информация об игре")
-                    .font(.title2.weight(.black))
-
-                HStack(spacing: 8) {
-                    infoCard("Поинты в игре", store.pointsInGame, NativeTheme.accent)
-                    infoCard("Оплачено", store.pointsPaid, NativeTheme.orange)
-                    infoCard("Призовые", store.prizePoints, NativeTheme.green)
-                }
-
-                HStack(spacing: 8) {
-                    infoCard("Фишки", store.chipsInGame, NativeTheme.cyan, details: "\(formatDecimal(store.totalChipsInBigBlinds)) BB")
-                    infoCard("Средний стек", store.averageStack, NativeTheme.blue, details: "\(formatDecimal(store.averageStackInBigBlinds)) BB")
-                }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Призовые места")
-                        .font(.headline.weight(.black))
-                    ForEach(store.prizePayouts()) { payout in
-                        prizePayoutRow(payout)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 8) {
+                        infoCard("Поинты в игре", store.pointsInGame, NativeTheme.accent)
+                        infoCard("Оплачено", store.pointsPaid, NativeTheme.orange)
+                        infoCard("Призовые", store.prizePoints, NativeTheme.green)
                     }
 
-                    Divider()
+                    HStack(spacing: 8) {
+                        infoCard("Фишки", store.chipsInGame, NativeTheme.cyan, details: "\(formatDecimal(store.totalChipsInBigBlinds)) BB")
+                        infoCard("Средний стек", store.averageStack, NativeTheme.blue, details: "\(formatDecimal(store.averageStackInBigBlinds)) BB")
+                    }
 
-                    HStack {
-                        Text("Осталось за финальным столом")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text("\(store.finalTableRemainder())")
-                            .font(.body.weight(.black))
-                            .foregroundStyle(NativeTheme.green)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Призовые места")
+                            .font(.headline)
+                            .padding(.bottom, 8)
+
+                        ForEach(Array(store.prizePayouts().enumerated()), id: \.element.id) { index, payout in
+                            if index > 0 {
+                                Divider()
+                            }
+                            prizePayoutRow(payout)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            Text("Осталось за финальным столом")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(store.finalTableRemainder().formatted())
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(NativeTheme.green)
+                        }
+                        .padding(.top, 12)
+                    }
+                    .padding(16)
+                    .background(
+                        Color(uiColor: .secondarySystemGroupedBackground),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    )
+                }
+                .padding(16)
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.size.height
+                } action: { height in
+                    if abs(measuredContentHeight - height) > 1 {
+                        measuredContentHeight = height
                     }
                 }
-                .padding()
-                .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 22))
-                .overlay(RoundedRectangle(cornerRadius: 22).stroke(NativeTheme.border))
             }
-            .padding(20)
+            .scrollBounceBehavior(.basedOnSize)
+            .navigationTitle("Информация об игре")
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .background(NativeTheme.dialogBackground.ignoresSafeArea())
+        .presentationDetents([preferredDetent])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var preferredDetent: PresentationDetent {
+        let desiredHeight = max(320, measuredContentHeight + 72)
+        let maximumCompactHeight = max(420, screenHeight - 110)
+        return desiredHeight < maximumCompactHeight ? .height(desiredHeight) : .large
+    }
+
+    private var screenHeight: CGFloat {
+        let scene = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }
+        return scene?.screen.bounds.height ?? 844
     }
 
     private func prizePayoutRow(_ payout: NativePrizePayout) -> some View {
         HStack(spacing: 10) {
             Text("\(payout.place)")
-                .font(.headline.weight(.black))
+                .font(.headline.weight(.semibold))
                 .monospacedDigit()
                 .frame(width: 34, height: 34)
                 .background(placeColor(payout.place).opacity(0.2), in: Circle())
@@ -1152,50 +1540,51 @@ struct NativeInfoSheet: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(payout.place) место")
-                    .font(.subheadline.weight(.black))
+                    .font(.subheadline.weight(.semibold))
                 Text(payout.playerName ?? "Не определено")
-                    .font(.caption.weight(.bold))
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
             Spacer(minLength: 8)
 
             VStack(alignment: .trailing, spacing: 2) {
-                Text("\(payout.amount)")
-                    .font(.headline.weight(.black))
+                Text(payout.amount.formatted())
+                    .font(.headline.weight(.semibold))
                     .monospacedDigit()
                     .foregroundStyle(NativeTheme.green)
                 Text("\(formatDecimal(realPrizePercent(for: payout)))%")
-                    .font(.caption.weight(.bold))
+                    .font(.caption)
                     .monospacedDigit()
                     .foregroundStyle(NativeTheme.accent)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(NativeTheme.surfaceStrong, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.vertical, 9)
     }
 
     private func infoCard(_ title: String, _ value: Int, _ color: Color, details: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .font(.caption.weight(.black))
+                .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
-            Text("\(value)")
-                .font(.headline.weight(.black))
+            Text(value.formatted())
+                .font(.headline.weight(.semibold))
                 .monospacedDigit()
                 .foregroundStyle(color)
             if let details {
                 Text(details)
-                    .font(.caption.weight(.bold))
+                    .font(.caption)
                     .foregroundStyle(color.opacity(0.72))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 22))
+        .padding(12)
+        .background(
+            Color(uiColor: .secondarySystemGroupedBackground),
+            in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+        )
     }
 
     private func realPrizePercent(for payout: NativePrizePayout) -> Double {
@@ -1220,54 +1609,84 @@ struct NativeInfoSheet: View {
     }
 }
 
+enum NativeTimerBulkAction {
+    case duration
+    case bigBlindAnte
+    case resetAnte
+}
+
 struct NativeTimerSettingsSheet: View {
-    @ObservedObject var store: NativeTournamentStore
+    let store: NativeTournamentStore
     @Environment(\.dismiss) private var dismiss
     @State private var levels: [NativeTimerLevel]
+    @State private var originalLevels: [NativeTimerLevel]
     @State private var bulkDurationMinutes: Int
     @State private var showResetConfirmation = false
+    @State private var activeNumberPicker: NativeTimerPickerTarget?
+    @State private var bulkActionFeedback: NativeTimerBulkAction?
 
     init(store: NativeTournamentStore) {
         self.store = store
         let currentLevels = store.settings.timerLevels
         _levels = State(initialValue: currentLevels)
+        _originalLevels = State(initialValue: currentLevels)
         _bulkDurationMinutes = State(initialValue: max(1, (currentLevels.first?.durationSeconds ?? 900) / 60))
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
-                Section("Длительность") {
-                    HStack(spacing: 10) {
-                        NativeNumberField(title: "Мин.", value: $bulkDurationMinutes, placeholder: "15", minimum: 1)
-                        Button("Применить") {
-                            bulkDurationMinutes = max(1, bulkDurationMinutes)
-                            for index in levels.indices {
-                                levels[index].durationSeconds = bulkDurationMinutes * 60
-                            }
+                Section("Для всех уровней") {
+                    pickerButton(
+                        title: "Длительность",
+                        value: "\(bulkDurationMinutes) мин",
+                        target: .bulkDuration
+                    )
+
+                    Button {
+                        bulkDurationMinutes = max(1, bulkDurationMinutes)
+                        for index in levels.indices {
+                            levels[index].durationSeconds = bulkDurationMinutes * 60
                         }
-                        .buttonStyle(NativeSoftButtonStyle())
-                        .fixedSize(horizontal: true, vertical: false)
+                        bulkActionFeedback = .duration
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    } label: {
+                        Label("Применить длительность", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(NativeTheme.accent)
+                    }
+
+                    if bulkActionFeedback == .duration {
+                        actionFeedback("Длительность применена к \(levels.count) уровням", color: NativeTheme.accent)
                     }
                 }
 
-                Section("Анте") {
-                    HStack(spacing: 8) {
-                        Button("ББ Анте") {
-                            for index in levels.indices {
-                                levels[index].ante = levels[index].bigBlind
-                            }
+                Section("Анте для всех уровней") {
+                    Button {
+                        for index in levels.indices {
+                            levels[index].ante = levels[index].bigBlind
                         }
-                        .frame(maxWidth: .infinity)
-                        .buttonStyle(NativeSoftButtonStyle())
+                        bulkActionFeedback = .bigBlindAnte
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    } label: {
+                        Label("Установить ББ анте", systemImage: "equal.circle.fill")
+                            .foregroundStyle(NativeTheme.accent)
+                    }
 
-                        Button("Убрать анте", role: .destructive) {
-                            for index in levels.indices {
-                                levels[index].ante = 0
-                            }
+                    Button(role: .destructive) {
+                        for index in levels.indices {
+                            levels[index].ante = 0
                         }
-                        .frame(maxWidth: .infinity)
-                        .buttonStyle(NativeSoftButtonStyle(tint: NativeTheme.red))
+                        bulkActionFeedback = .resetAnte
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    } label: {
+                        Label("Сбросить анте", systemImage: "xmark.circle.fill")
+                            .foregroundStyle(NativeTheme.red)
+                    }
+
+                    if bulkActionFeedback == .bigBlindAnte {
+                        actionFeedback("ББ анте установлено для всех уровней", color: NativeTheme.accent)
+                    } else if bulkActionFeedback == .resetAnte {
+                        actionFeedback("Анте сброшено для всех уровней", color: NativeTheme.red)
                     }
                 }
 
@@ -1276,6 +1695,9 @@ struct NativeTimerSettingsSheet: View {
                         NativeTimerLevelEditor(
                             index: index,
                             level: levelBinding(at: index),
+                            onSelect: { field in
+                                activeNumberPicker = .level(index: index, field: field)
+                            },
                             onDelete: levels.count > 1 ? { levels.remove(at: index) } : nil
                         )
                     }
@@ -1284,25 +1706,41 @@ struct NativeTimerSettingsSheet: View {
                         levels.append(nextLevel())
                     } label: {
                         Label("Добавить уровень", systemImage: "plus")
+                            .foregroundStyle(NativeTheme.accent)
                     }
                 }
             }
             .navigationTitle("Таймер")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Сбросить") {
+                    Button(role: .destructive) {
                         showResetConfirmation = true
+                    } label: {
+                        Label("Сбросить", systemImage: "arrow.counterclockwise")
                     }
+                    .tint(NativeTheme.red)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Готово") {
+                    Button("Сохранить") {
                         var next = store.settings
                         next.timerLevels = levels.map(normalizedLevel)
                         store.updateSettings(next)
                         dismiss()
                     }
+                    .disabled(!hasChanges)
+                    .tint(NativeTheme.accent)
                 }
             }
+        }
+        .sheet(item: $activeNumberPicker) { target in
+            NativeNumberPickerSheet(
+                title: target.title,
+                value: pickerBinding(for: target),
+                minimum: target.minimum,
+                maximum: nil,
+                step: target.step
+            )
         }
         .alert(isPresented: $showResetConfirmation) {
             Alert(
@@ -1311,11 +1749,68 @@ struct NativeTimerSettingsSheet: View {
                 primaryButton: .destructive(Text("Сбросить")) {
                     levels = NativeSettings.defaultTimerLevels
                     bulkDurationMinutes = 15
+                    bulkActionFeedback = nil
                 },
                 secondaryButton: .cancel(Text("Отмена"))
             )
         }
-        .background(NativeTheme.dialogBackground.ignoresSafeArea())
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var hasChanges: Bool {
+        levels != originalLevels
+    }
+
+    private func actionFeedback(_ text: String, color: Color) -> some View {
+        Label(text, systemImage: "checkmark")
+            .font(.caption)
+            .foregroundStyle(color)
+    }
+
+    private func pickerButton(title: String, value: String, target: NativeTimerPickerTarget) -> some View {
+        Button {
+            activeNumberPicker = target
+        } label: {
+            HStack(spacing: 8) {
+                Text(title)
+                    .foregroundStyle(.primary)
+                Spacer(minLength: 8)
+                Text(value)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func pickerBinding(for target: NativeTimerPickerTarget) -> Binding<Int> {
+        switch target {
+        case .bulkDuration:
+            return $bulkDurationMinutes
+        case .level(let index, let field):
+            return Binding {
+                guard levels.indices.contains(index) else { return field.minimum }
+                switch field {
+                case .smallBlind: return levels[index].smallBlind
+                case .bigBlind: return levels[index].bigBlind
+                case .ante: return levels[index].ante
+                case .duration: return max(1, levels[index].durationSeconds / 60)
+                }
+            } set: { value in
+                guard levels.indices.contains(index) else { return }
+                switch field {
+                case .smallBlind: levels[index].smallBlind = max(50, value)
+                case .bigBlind: levels[index].bigBlind = max(50, value)
+                case .ante: levels[index].ante = max(0, value)
+                case .duration: levels[index].durationSeconds = max(1, value) * 60
+                }
+            }
+        }
     }
 
     private func levelBinding(at index: Int) -> Binding<NativeTimerLevel> {
@@ -1331,8 +1826,9 @@ struct NativeTimerSettingsSheet: View {
             return NativeTimerLevel(smallBlind: 100, bigBlind: 200, ante: 200, durationSeconds: bulkDurationMinutes * 60, colorUpChip: nil)
         }
 
-        let smallBlind = max(1, last.smallBlind + max(50, last.smallBlind / 4))
-        let bigBlind = max(smallBlind + 1, smallBlind * 2)
+        let proposedSmallBlind = last.smallBlind + max(50, last.smallBlind / 4)
+        let smallBlind = max(50, ((proposedSmallBlind + 49) / 50) * 50)
+        let bigBlind = max(50, ((smallBlind * 2 + 49) / 50) * 50)
         return NativeTimerLevel(
             smallBlind: smallBlind,
             bigBlind: bigBlind,
@@ -1353,19 +1849,111 @@ struct NativeTimerSettingsSheet: View {
     }
 }
 
+enum NativeTimerLevelField: String {
+    case smallBlind
+    case bigBlind
+    case ante
+    case duration
+
+    var title: String {
+        switch self {
+        case .smallBlind: return "SB"
+        case .bigBlind: return "BB"
+        case .ante: return "Ante"
+        case .duration: return "Длительность"
+        }
+    }
+
+    var minimum: Int {
+        switch self {
+        case .smallBlind, .bigBlind: return 50
+        case .ante: return 0
+        case .duration: return 1
+        }
+    }
+
+    var step: Int {
+        self == .duration ? 1 : 50
+    }
+}
+
+enum NativeTimerPickerTarget: Identifiable {
+    case bulkDuration
+    case level(index: Int, field: NativeTimerLevelField)
+
+    var id: String {
+        switch self {
+        case .bulkDuration: return "bulk-duration"
+        case .level(let index, let field): return "level-\(index)-\(field.rawValue)"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .bulkDuration: return "Длительность уровней"
+        case .level(let index, let field): return "Уровень \(index + 1) · \(field.title)"
+        }
+    }
+
+    var minimum: Int {
+        switch self {
+        case .bulkDuration: return 1
+        case .level(_, let field): return field.minimum
+        }
+    }
+
+    var step: Int {
+        switch self {
+        case .bulkDuration: return 1
+        case .level(_, let field): return field.step
+        }
+    }
+}
+
 struct NativeTimerLevelEditor: View {
     let index: Int
     @Binding var level: NativeTimerLevel
+    let onSelect: (NativeTimerLevelField) -> Void
     let onDelete: (() -> Void)?
+    @State private var isExpanded = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Уровень \(index + 1)")
-                    .font(.headline.weight(.black))
-                Spacer()
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
                 Button {
-                    cycleColorUp()
+                    withAnimation(.snappy(duration: 0.22)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .rotationEffect(.degrees(isExpanded ? 90 : 0))
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Уровень \(index + 1)")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text(levelSummary)
+                                .font(.caption)
+                                .monospacedDigit()
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+
+                        Spacer(minLength: 4)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                Menu {
+                    colorUpOption(nil, title: "Без Color Up")
+                    colorUpOption(50, title: "CU 50")
+                    colorUpOption(100, title: "CU 100")
+                    colorUpOption(500, title: "CU 500")
+                    colorUpOption(1000, title: "CU 1000")
                 } label: {
                     Text(colorUpTitle)
                         .font(.caption.weight(.black))
@@ -1374,34 +1962,67 @@ struct NativeTimerLevelEditor: View {
                         .background(colorUpColor.opacity(0.18), in: Capsule())
                         .foregroundStyle(colorUpColor)
                 }
-                .buttonStyle(.plain)
-                if let onDelete {
-                    Button(action: onDelete) {
-                        Image(systemName: "trash")
-                            .font(.subheadline.weight(.black))
-                            .foregroundStyle(NativeTheme.red)
-                            .frame(width: 34, height: 34)
-                            .background(NativeTheme.red.opacity(0.14), in: Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Circle())
+            }
+            .padding(.vertical, 4)
+
+            if isExpanded {
+                Divider()
+                    .padding(.vertical, 6)
+                    .padding(.leading, 24)
+
+                VStack(spacing: 14) {
+                    valueRow("SB", value: level.smallBlind, field: .smallBlind)
+                    valueRow("BB", value: level.bigBlind, field: .bigBlind)
+                    valueRow("Ante", value: level.ante, field: .ante)
+                    valueRow("Длительность", value: durationMinutes, suffix: " мин", field: .duration)
+                }
+                .padding(.leading, 24)
+                .padding(.bottom, 6)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if let onDelete {
+                Button(role: .destructive, action: onDelete) {
+                    Label("Удалить", systemImage: "trash")
                 }
             }
-
-            NativeNumberField(title: "SB", value: $level.smallBlind, placeholder: "100", minimum: 1)
-            NativeNumberField(title: "BB", value: $level.bigBlind, placeholder: "200", minimum: 1)
-            NativeNumberField(title: "Ante", value: $level.ante, placeholder: "200", minimum: 0)
-            NativeNumberField(title: "Минуты", value: durationMinutesBinding, placeholder: "15", minimum: 1)
         }
-        .padding(.vertical, 6)
     }
 
-    private var durationMinutesBinding: Binding<Int> {
-        Binding {
-            max(1, level.durationSeconds / 60)
-        } set: { value in
-            level.durationSeconds = max(1, value) * 60
+    private func valueRow(
+        _ title: String,
+        value: Int,
+        suffix: String = "",
+        field: NativeTimerLevelField
+    ) -> some View {
+        Button {
+            onSelect(field)
+        } label: {
+            HStack(spacing: 8) {
+                Text(title)
+                    .foregroundStyle(.primary)
+                Spacer(minLength: 8)
+                Text("\(value)\(suffix)")
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+    }
+
+    private var durationMinutes: Int {
+        max(1, level.durationSeconds / 60)
+    }
+
+    private var levelSummary: String {
+        let blinds = "\(level.smallBlind) / \(level.bigBlind)"
+        let ante = level.ante > 0 ? " · Ante \(level.ante)" : ""
+        return "\(blinds)\(ante) · \(durationMinutes) мин"
     }
 
     private var colorUpTitle: String {
@@ -1421,10 +2042,16 @@ struct NativeTimerLevelEditor: View {
         }
     }
 
-    private func cycleColorUp() {
-        let values: [Int?] = [nil, 50, 100, 500, 1000]
-        let currentIndex = values.firstIndex { $0 == level.colorUpChip } ?? 0
-        level.colorUpChip = values[(currentIndex + 1) % values.count]
+    private func colorUpOption(_ chip: Int?, title: String) -> some View {
+        Button {
+            level.colorUpChip = chip
+        } label: {
+            if level.colorUpChip == chip {
+                Label(title, systemImage: "checkmark")
+            } else {
+                Text(title)
+            }
+        }
     }
 }
 
@@ -1445,9 +2072,9 @@ struct NativeSoftButtonStyle: ButtonStyle {
 }
 
 struct NativeTimerAlertSettingsSheet: View {
-    @ObservedObject var store: NativeTournamentStore
-    @Environment(\.dismiss) private var dismiss
+    let store: NativeTournamentStore
     @State private var settings: NativeSettings
+    @State private var alarmStatusText: String?
 
     init(store: NativeTournamentStore) {
         self.store = store
@@ -1455,136 +2082,207 @@ struct NativeTimerAlertSettingsSheet: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
-                Section("Смена уровня") {
+                Section {
+                    Toggle("Системный сигнал", isOn: systemAlarmBinding)
+                        .tint(NativeTheme.accent)
                     Toggle("Звук", isOn: $settings.timerSoundEnabled)
-                        .toggleStyle(SwitchToggleStyle(tint: NativeTheme.accent))
-                    Toggle("Вибрация", isOn: $settings.timerVibrationEnabled)
-                        .toggleStyle(SwitchToggleStyle(tint: NativeTheme.accent))
-                    Toggle("Уведомление", isOn: notificationBinding)
-                        .toggleStyle(SwitchToggleStyle(tint: NativeTheme.accent))
+                        .tint(NativeTheme.accent)
+                        .disabled(!settings.timerNotificationEnabled)
+                } header: {
+                    Text("Смена уровня")
+                } footer: {
+                    Text("AlarmKit показывает системный сигнал на экране блокировки и срабатывает даже в бесшумном режиме и при активном Focus.")
                 }
 
                 Section {
                     Button {
-                        NativeTimerAlertManager.shared.trigger(
-                            settings: settings,
-                            levelIndex: store.timer.currentLevelIndex,
-                            level: store.currentLevel
-                        )
+                        testSystemAlarm()
                     } label: {
                         Label("Проверить сигнал", systemImage: "bell.and.waves.left.and.right.fill")
                     }
+                    .foregroundStyle(NativeTheme.accent)
+                    .disabled(!settings.timerNotificationEnabled)
                 } footer: {
-                    Text("В фоне iOS может ограничивать выполнение приложения. Live Activity остается основным способом видеть таймер после сворачивания.")
+                    Text(alarmStatusText ?? "Тестовый системный сигнал сработает через 3 секунды.")
                 }
             }
             .navigationTitle("Уведомления")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Готово") {
-                        store.updateSettings(settings)
-                        dismiss()
-                    }
-                }
+            .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: settings) { _, nextSettings in
+                store.updateSettings(nextSettings)
             }
         }
-        .background(NativeTheme.dialogBackground.ignoresSafeArea())
+        .presentationDetents([.height(420)])
+        .presentationDragIndicator(.visible)
+        .presentationContentInteraction(.scrolls)
     }
 
-    private var notificationBinding: Binding<Bool> {
+    private var systemAlarmBinding: Binding<Bool> {
         Binding {
             settings.timerNotificationEnabled
         } set: { value in
             settings.timerNotificationEnabled = value
             if value {
-                NativeTimerAlertManager.shared.requestNotificationPermission()
+                Task {
+                    let authorized = await NativeTimerAlertManager.shared.requestAuthorization()
+                    if !authorized {
+                        settings.timerNotificationEnabled = false
+                        alarmStatusText = "Доступ к системным сигналам запрещён. Его можно включить в настройках iOS."
+                    }
+                }
             }
+        }
+    }
+
+    private func testSystemAlarm() {
+        alarmStatusText = "Сигнал запланирован…"
+        Task {
+            let scheduled = await NativeTimerAlertManager.shared.scheduleTest(
+                levelIndex: store.timer.currentLevelIndex,
+                level: store.currentLevel,
+                soundEnabled: settings.timerSoundEnabled
+            )
+            alarmStatusText = scheduled
+                ? "Системный сигнал сработает через 3 секунды."
+                : "Не удалось запланировать сигнал. Проверьте разрешение AlarmKit в настройках iOS."
         }
     }
 }
 
+struct NativeRebuyTimerSettingsSheet: View {
+    let store: NativeTournamentStore
+    @State private var settings: NativeSettings
+    @State private var intervalMinutes: Int
+    @State private var showIntervalPicker = false
+
+    init(store: NativeTournamentStore) {
+        self.store = store
+        let settings = store.settings
+        _settings = State(initialValue: settings)
+        _intervalMinutes = State(initialValue: max(1, settings.rebuyTimerIntervalSeconds / 60))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Toggle("Включить", isOn: $settings.rebuyTimerEnabled)
+                        .tint(NativeTheme.accent)
+                    Button {
+                        showIntervalPicker = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Text("Интервал")
+                                .foregroundStyle(.primary)
+                            Spacer(minLength: 8)
+                            Text("\(intervalMinutes) мин")
+                                .monospacedDigit()
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                } header: {
+                    Text("Таймер ребаев")
+                } footer: {
+                    Text("Таймер запускается индивидуально для игрока при добавлении ребая. На паузе блайндов таймер ребаев тоже останавливается.")
+                }
+            }
+            .navigationTitle("Таймер ребаев")
+            .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: intervalMinutes) { _, minutes in
+                settings.rebuyTimerIntervalSeconds = max(1, minutes) * 60
+            }
+            .onChange(of: settings) { _, nextSettings in
+                store.updateSettings(nextSettings)
+            }
+        }
+        .sheet(isPresented: $showIntervalPicker) {
+            NativeNumberPickerSheet(
+                title: "Интервал ребаев",
+                value: $intervalMinutes,
+                minimum: 1,
+                maximum: nil,
+                step: 1
+            )
+        }
+        .presentationDetents([.height(310)])
+        .presentationDragIndicator(.visible)
+        .presentationContentInteraction(.scrolls)
+    }
+}
+
 struct NativeReferenceSheet: View {
-    @Environment(\.dismiss) private var dismiss
     @State private var expandedSectionIDs: Set<String> = []
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    ForEach(NativeReferenceContent.sections) { section in
-                        VStack(alignment: .leading, spacing: 12) {
-                            Button {
-                                toggle(section.id)
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Text(section.title)
-                                        .font(.headline.weight(.black))
-                                        .foregroundStyle(.white)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    Image(systemName: isExpanded(section.id) ? "chevron.up" : "chevron.down")
-                                        .font(.caption.weight(.black))
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .buttonStyle(.plain)
-
-                            if isExpanded(section.id) {
-                                VStack(alignment: .leading, spacing: 14) {
-                                    ForEach(section.items) { item in
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            if let title = item.title {
-                                                Text(title)
-                                                    .font(.subheadline.weight(.black))
-                                                    .foregroundStyle(.white)
-                                            }
-
-                                            ForEach(item.bullets, id: \.self) { bullet in
-                                                HStack(alignment: .top, spacing: 8) {
-                                                    Circle()
-                                                        .fill(Color.white.opacity(0.72))
-                                                        .frame(width: 5, height: 5)
-                                                        .padding(.top, 7)
-                                                    Text(bullet)
-                                                        .font(.subheadline)
-                                                        .foregroundStyle(.white.opacity(0.86))
-                                                        .fixedSize(horizontal: false, vertical: true)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                .padding(.top, 2)
-                            }
+        NavigationStack {
+            List {
+                ForEach(NativeReferenceContent.sections) { section in
+                    Section {
+                        DisclosureGroup(
+                            isExpanded: expansionBinding(for: section.id)
+                        ) {
+                            referenceSectionContent(section)
+                        } label: {
+                            Text(section.title)
+                                .font(.body.weight(.semibold))
                         }
-                        .padding(16)
-                        .background(NativeTheme.surface, in: RoundedRectangle(cornerRadius: 20))
-                        .overlay(RoundedRectangle(cornerRadius: 20).stroke(NativeTheme.border))
                     }
                 }
-                .padding(20)
             }
+            .listStyle(.insetGrouped)
             .navigationTitle("Справочник")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Закрыть") { dismiss() }
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func referenceSectionContent(_ section: NativeReferenceSection) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(section.items) { item in
+                VStack(alignment: .leading, spacing: 8) {
+                    if let title = item.title {
+                        Text(title)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+                    }
+
+                    ForEach(item.bullets, id: \.self) { bullet in
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text("•")
+                                .foregroundStyle(.primary)
+
+                            Text(bullet)
+                                .font(.subheadline)
+                                .foregroundStyle(.primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
                 }
             }
-            .background(NativeTheme.dialogBackground.ignoresSafeArea())
         }
+        .padding(.top, 10)
+        .padding(.bottom, 4)
     }
 
-    private func isExpanded(_ id: String) -> Bool {
-        expandedSectionIDs.contains(id)
-    }
-
-    private func toggle(_ id: String) {
-        if expandedSectionIDs.contains(id) {
-            expandedSectionIDs.remove(id)
-        } else {
-            expandedSectionIDs.insert(id)
-        }
+    private func expansionBinding(for id: String) -> Binding<Bool> {
+        Binding(
+            get: { expandedSectionIDs.contains(id) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedSectionIDs.insert(id)
+                } else {
+                    expandedSectionIDs.remove(id)
+                }
+            }
+        )
     }
 }
 
@@ -1598,7 +2296,7 @@ struct NativeConfirmation: Identifiable {
     static func resetTournament(action: @escaping () -> Void) -> NativeConfirmation {
         NativeConfirmation(
             title: "Сбросить турнир?",
-            message: "Все игроки, бай-ины и оплаты будут удалены. Параметры игры и история имен сохранятся.",
+            message: "Все игроки, бай-ины, ребаи и оплаты будут удалены. Параметры игры и история имен сохранятся.",
             confirmTitle: "Сбросить",
             action: action
         )
@@ -1616,7 +2314,7 @@ struct NativeConfirmation: Identifiable {
     static func deletePlayer(_ name: String, action: @escaping () -> Void) -> NativeConfirmation {
         NativeConfirmation(
             title: "Удалить игрока?",
-            message: "Игрок «\(name)» будет удален вместе со всеми его бай-инами и оплатами.",
+            message: "Игрок «\(name)» будет удален вместе со всеми его бай-инами, ребаями и оплатами.",
             confirmTitle: "Удалить",
             action: action
         )
@@ -1624,8 +2322,17 @@ struct NativeConfirmation: Identifiable {
 
     static func decrementBuyIn(_ name: String, action: @escaping () -> Void) -> NativeConfirmation {
         NativeConfirmation(
+            title: "Убрать ребай?",
+            message: "У игрока «\(name)» будет убран один ребай. Если оплат станет больше, они тоже будут скорректированы.",
+            confirmTitle: "Убрать",
+            action: action
+        )
+    }
+
+    static func decrementEarlyEntry(_ name: String, action: @escaping () -> Void) -> NativeConfirmation {
+        NativeConfirmation(
             title: "Убрать бай-ин?",
-            message: "У игрока «\(name)» будет убран один бай-ин. Если оплат станет больше, они тоже будут скорректированы.",
+            message: "У игрока «\(name)» будет убран бай-ин. Общие оплаты будут скорректированы при необходимости.",
             confirmTitle: "Убрать",
             action: action
         )
@@ -1653,7 +2360,6 @@ struct NativeConfirmation: Identifiable {
 enum NativeSheet: Identifiable {
     case addPlayer
     case settings
-    case timerSettings
     case timerAlerts
     case reference
     case info
@@ -1662,7 +2368,6 @@ enum NativeSheet: Identifiable {
         switch self {
         case .addPlayer: return "add-player"
         case .settings: return "settings"
-        case .timerSettings: return "timer-settings"
         case .timerAlerts: return "timer-alerts"
         case .reference: return "reference"
         case .info: return "info"
